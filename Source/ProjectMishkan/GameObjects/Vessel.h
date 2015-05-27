@@ -20,6 +20,21 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	
+private:
+	// The final location of this Vessel in the Mishkan
+	UPROPERTY(Category = Mishkan, EditAnywhere)
+	FVector2D GridLocation;
+
+	// The final rotation amount of this Vessel in the Mishkan (values 0 - 3)
+	UPROPERTY(Category = Mishkan, EditAnywhere)
+	float GridRotation;
+
+	// Place the Vessel in it's final location or not
+	UPROPERTY(Category = Mishkan, EditAnywhere)
+	bool PlaceOnGrid;
+
+	// The Vessel's current rotation amount
+	UPROPERTY(Category = Mishkan, VisibleAnywhere)
+	float currentRotation;
 	
 };
