@@ -64,4 +64,3 @@ DerivedDataCache/*
 *.swp
 *.swo
 .ctrlp_cache/
-*.uasset

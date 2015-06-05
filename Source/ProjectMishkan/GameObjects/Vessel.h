@@ -9,10 +9,6 @@ UCLASS()
 class PROJECTMISHKAN_API AVessel : public AActor
 {
 	GENERATED_BODY()
-	
-	// The Static Mesh that stores the 3D Model
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* ThreeDeeModel;
 
 public:	
 	// Sets default values for this actor's properties
@@ -28,11 +24,16 @@ public:
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
 private:
+	// The Static Mesh that stores the 3D Model
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* ThreeDeeModel;
+
+	// How many degrees a single rotation does
 	static const uint8 RotationAngle;
 
 	// The final location of this Vessel in the Mishkan
-	UPROPERTY(Category = Mishkan, EditAnywhere)
-	FVector2D GridLocation;
+	UPROPERTY(Category = Mishkan, EditAnywhere, meta = (ClampMin = "0", UIMin = "0"))
+	FIntPoint GridLocation;
 
 	// The final rotation amount of this Vessel in the Mishkan (how many quarter turns)
 	UPROPERTY(Category = Mishkan, EditAnywhere, meta = (ClampMin = "0", ClampMax = "3", UIMin = "0", UIMax = "3"))
