@@ -14,6 +14,9 @@ public:
 	// Sets default values for this actor's properties
 	AMishkanGrid();
 
+	// Called after the constructor and properties are loaded
+	virtual void PostRegisterAllComponents() override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -38,4 +41,13 @@ private:
 	// The size of the grid in square units
 	UPROPERTY(Category = GridData, EditAnywhere, meta = (ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200"))
 	FIntPoint GridSize;
+
+	// Display variables
+	UStaticMesh* GridCubeMesh;
+	UMaterial* GridMaterial;
+
+	bool FirstTimeCreating;
+
+	// Used to see if GridSize changes
+	FIntPoint PreviousGridSize;
 };

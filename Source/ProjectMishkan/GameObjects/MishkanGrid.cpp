@@ -6,11 +6,30 @@
 
 // Sets default values
 AMishkanGrid::AMishkanGrid()
-	: GridSize(2, 2), SquareSize(20)
+	: GridSize(2, 2), SquareSize(20), FirstTimeCreating(true)
 {
-	CreateGridSquares();
+	ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	if (CubeMesh.Object) {
+		GridCubeMesh = CubeMesh.Object;
+	}
+	ConstructorHelpers::FObjectFinder<UMaterial> Material(TEXT("Material'/Engine/EngineMaterials/CubeMaterial.CubeMaterial'"));
+	if (Material.Object) {
+		GridMaterial = Material.Object;
+	}
 
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+// Called after the constructor and properties are loaded
+void AMishkanGrid::PostRegisterAllComponents()
+{
+	if (FirstTimeCreating) {
+		PreviousGridSize = GridSize;
+		FirstTimeCreating = false;
+		CreateStaticMesh();
+		CreateGridSquares();
+	}
+	Super::PostRegisterAllComponents();
 }
 
 // Called when the game starts or when spawned
@@ -22,24 +41,18 @@ void AMishkanGrid::BeginPlay()
 // Creates the Grid's own Static Mesh
 void AMishkanGrid::CreateStaticMesh()
 {
-	GridMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GridMesh"));
-	RootComponent = GridMesh;
-
-	ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
-	if (CubeMesh.Object) {
-		GridMesh->SetStaticMesh(CubeMesh.Object);
-	}
-	ConstructorHelpers::FObjectFinder<UMaterial> Material(TEXT("Material'/Engine/EngineMaterials/CubeMaterial.CubeMaterial'"));
-	if (Material.Object) {
-		GridMesh->SetMaterial(0, Material.Object);
-	}
+	GridMesh = ConstructObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), this, TEXT("GridMesh"));
+	GridMesh->SetStaticMesh(GridCubeMesh);	// TODO: Check for null?
+	GridMesh->SetMaterial(0, GridMaterial);
+	GridMesh->SetRelativeLocation(FVector(0, 0, 300));		// TODO: Get its stored location
 	GridMesh->SetRelativeScale3D(FVector(GridSize.X, GridSize.Y, 0.01f));
+	GridMesh->RegisterComponent();
+	RootComponent = GridMesh;
 }
 
 // Creates the GridSquares and positions depending on the GridSize
 void AMishkanGrid::CreateGridSquares()
 {
-	CreateStaticMesh();
 	const float parentSize = 100.0f;	// Relative size that is equal to parent (ie: 100%)
 	const float gridSquareSizeX = parentSize / (float) GridSize.X;
 	const float gridSquareSizeY = parentSize / (float) GridSize.Y;
@@ -56,7 +69,8 @@ void AMishkanGrid::CreateGridSquares()
 	for (uint8 width = 0; width < GridSize.X; ++width) {
 		for (uint8 height = 0; height < GridSize.Y; ++height) {
 			const FVector squareLocation = FVector(currentX + centerOffsetX, currentY + centerOffsetY, 2.0f);
-			UMishkanGridSquare* newSquare = CreateDefaultSubobject<UMishkanGridSquare>(*FString::Printf(TEXT("GridSquare%d"), i++));
+			UMishkanGridSquare* newSquare = ConstructObject<UMishkanGridSquare>(UMishkanGridSquare::StaticClass(), this, *FString::Printf(TEXT("GridSquare%d"), i++));
+			newSquare->RegisterComponent();	// TODO: Check for null?
 			newSquare->SetRelativeLocation(squareLocation);
 			newSquare->SetRelativeScale3D(squareScale);
 			newSquare->AttachTo(RootComponent);
@@ -71,10 +85,11 @@ void AMishkanGrid::CreateGridSquares()
 // Called when property is changed in the Unreal Editor
 void AMishkanGrid::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(AMishkanGrid, GridSize)) {
+	if (PreviousGridSize != GridSize) {		// If they changed either the X or Y of the Grid Size
+		// TODO: Don't delete the old grid, simply update it
+		CreateStaticMesh();
 		CreateGridSquares();
+		PreviousGridSize = GridSize;
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
