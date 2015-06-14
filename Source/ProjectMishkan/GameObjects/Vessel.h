@@ -3,8 +3,12 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "../Model/VesselTypes.h"
 #include "Vessel.generated.h"
 
+/**
+ * 3D object that is part of the Mishkan
+ */
 UCLASS()
 class PROJECTMISHKAN_API AVessel : public AActor
 {
@@ -31,6 +35,10 @@ private:
 	// How many degrees a single rotation does
 	static const uint8 RotationAngle;
 
+	UPROPERTY(Category = Mishkan, EditAnywhere)
+	EVesselType VesselType;
+
+	// TODO: Remove this??
 	// The final location of this Vessel in the Mishkan
 	UPROPERTY(Category = Mishkan, EditAnywhere, meta = (ClampMin = "0", UIMin = "0"))
 	FIntPoint GridLocation;

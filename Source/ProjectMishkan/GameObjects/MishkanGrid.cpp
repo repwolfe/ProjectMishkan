@@ -3,10 +3,12 @@
 #include "ProjectMishkan.h"
 #include "MishkanGrid.h"
 #include "MishkanGridSquare.h"
+#include "../Model/MishkanGridSave.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMishkanGrid::AMishkanGrid()
-	: GridSize(2, 2), SquareSize(20), FirstTimeCreating(true)
+	: GridSize(2, 2), SquareSize(20), SaveGrid(false), FirstTimeCreating(true)
 {
 	ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	if (CubeMesh.Object) {
@@ -41,6 +43,9 @@ void AMishkanGrid::BeginPlay()
 // Creates the Grid's own Static Mesh
 void AMishkanGrid::CreateStaticMesh()
 {
+	if (GridMesh != NULL) {
+		GridMesh->DestroyComponent();
+	}
 	GridMesh = ConstructObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), this, TEXT("GridMesh"));
 	GridMesh->SetStaticMesh(GridCubeMesh);	// TODO: Check for null?
 	GridMesh->SetMaterial(0, GridMaterial);
@@ -85,7 +90,11 @@ void AMishkanGrid::CreateGridSquares()
 // Called when property is changed in the Unreal Editor
 void AMishkanGrid::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PreviousGridSize != GridSize) {		// If they changed either the X or Y of the Grid Size
+	if (SaveGrid == true) {		// If they checked the Save Grid checkbox, save to a file
+		
+		SaveGrid = false;
+	}
+	else if (PreviousGridSize != GridSize) {		// If they changed either the X or Y of the Grid Size
 		// TODO: Don't delete the old grid, simply update it
 		CreateStaticMesh();
 		CreateGridSquares();

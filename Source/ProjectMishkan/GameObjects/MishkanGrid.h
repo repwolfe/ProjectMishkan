@@ -5,6 +5,11 @@
 #include "GameFramework/Actor.h"
 #include "MishkanGrid.generated.h"
 
+class UMishkanGridSquare;
+
+/**
+ * Actor that indicates where Vessels can be placed
+ */
 UCLASS()
 class PROJECTMISHKAN_API AMishkanGrid : public AActor
 {
@@ -41,6 +46,10 @@ private:
 	// The size of the grid in square units
 	UPROPERTY(Category = GridData, EditAnywhere, meta = (ClampMin = "1", ClampMax = "200", UIMin = "1", UIMax = "200"))
 	FIntPoint GridSize;
+
+	// Fake property to enable saving the grid state to a file
+	UPROPERTY(Category = GridData, EditAnywhere)
+	bool SaveGrid;
 
 	// Display variables
 	UStaticMesh* GridCubeMesh;

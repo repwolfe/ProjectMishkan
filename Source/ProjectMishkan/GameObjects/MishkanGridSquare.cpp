@@ -12,3 +12,13 @@ UMishkanGridSquare::UMishkanGridSquare(const FObjectInitializer& ObjectInitializ
 		SetStaticMesh(CubeMesh.Object);
 	}
 }
+
+const TArray<EVesselType>& UMishkanGridSquare::GetContainedVessels() const
+{
+	return ContainedVessels;
+}
+
+void UMishkanGridSquare::SetContainedVessels(TArray<EVesselType>& in)
+{
+	ContainedVessels = in;
+}

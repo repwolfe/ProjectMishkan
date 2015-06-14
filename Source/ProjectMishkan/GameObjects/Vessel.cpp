@@ -7,7 +7,7 @@ const uint8 AVessel::RotationAngle = 90;	// Quarter turns
 
 // Sets default values
 AVessel::AVessel()
-	: GridLocation(0, 0), GridRotation(0), PlaceOnGrid(false), CurrentRotation(FMath::RandRange(0, 3))
+	: VesselType(EVesselType::Undefined), GridLocation(0, 0), GridRotation(0), PlaceOnGrid(false), CurrentRotation(FMath::RandRange(0, 3))
 {
 	ThreeDeeModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Mesh"));
 	RootComponent = ThreeDeeModel;
