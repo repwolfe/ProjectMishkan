@@ -23,7 +23,7 @@ Ohel Cover	(Tent Cover)
 Masach Petach Ohel Moed	(Entrance Screen of the Tent)
 Kalei HaChatzer	(Curtains of the Courtyard)
 Masach Petach HaChatzer	(Entrance Screen of the Courtyard)
-Meitarim (Ropes)
+Meitarei Ohel Moed (Ropes)
 
  {במדבר ג‪:‬כה}  וּמִשְׁמֶרֶת בְּנֵי גֵרְשׁוֹן בְּאֹהֶל מוֹעֵד הַמִּשְׁכָּן וְהָאֹהֶל מִכְסֵהוּ וּמָסַךְ פֶּתַח אֹהֶל מוֹעֵד: {כו}  וְקַלְעֵי הֶחָצֵר וְאֶת מָסַךְ פֶּתַח הֶחָצֵר אֲשֶׁר עַל הַמִּשְׁכָּן וְעַל הַמִּזְבֵּחַ סָבִיב וְאֵת מֵיתָרָיו לְכֹל עֲבֹדָתוֹ:  
 
@@ -49,10 +49,13 @@ Items:
 Aron	(Ark)
 Shulchan	(Table)
 Menorah	(Menorah)
-Mitzbeach HaNeChoshes (Courtyard Altar)
-Mitzbeach Zahav (Incense Altar)
+Mizbe’ach HaOlah (Courtyard Altar)
+Mizbe’ach HaZahav (Incense Altar)
 Paroches	(Kodesh Kodoshim Partition Screen)
-[Avodato	(Utensils and accessories for items above, see note 1 at end of page)]
+{Avodato	(Utensils and accessories for items above including:}
+Lechem HaPanim
+Menorah Neros
+
 
 
  {במדבר ג:לא}  וּמִשְׁמַרְתָּם הָאָרֹן וְהַשֻּׁלְחָן וְהַמְּנֹרָה וְהַמִּזְבְּחֹת וּכְלֵי הַקֹּדֶשׁ אֲשֶׁר יְשָׁרְתוּ בָּהֶם וְהַמָּסָךְ וְכֹל עֲבֹדָתוֹ: 
@@ -75,18 +78,13 @@ Adanim 	(Mishkan Sockets)
 [Keilim vAvodato	(Utensils and accessories for items above, see note 2 at end of page)]
 Amudei HaChatzer	(Courtyard Pillars)
 Adanei HaChatzer	(Courtyard Sockets)
-Yidaydos	(Courtyard Pegs)
+Yidaydos HaChatzer	(Courtyard Pegs)
 Meitari HaChatzer	(Courtyard Ropes)
 
 
  {במדבר ג:לו}  וּפְקֻדַּת מִשְׁמֶרֶת בְּנֵי מְרָרִי קַרְשֵׁי הַמִּשְׁכָּן וּבְרִיחָיו וְעַמֻּדָיו וַאֲדָנָיו וְכָל כֵּלָיו וְכֹל עֲבֹדָתוֹ: {לז}  וְעַמֻּדֵי הֶחָצֵר סָבִיב וְאַדְנֵיהֶם וִיתֵדֹתָם וּמֵיתְרֵיהֶם:
 
 
-
-
-
-note 1 Bnei Kahat utensils and accessories included:
-[TBD if items will be included in this version]
 
 
 note 2 Bnei Merari utensils and accessories included: 
