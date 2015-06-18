@@ -2,35 +2,41 @@
 
 #include "ProjectMishkan.h"
 #include "Vessel.h"
+#include "../Controllers/ProjectMishkanPlayerController.h"
 
 const uint8 AVessel::RotationAngle = 90;	// Quarter turns
 
 // Sets default values
 AVessel::AVessel()
-	: VesselType(EVesselType::Undefined), GridLocation(0, 0), GridRotation(0), PlaceOnGrid(false), CurrentRotation(FMath::RandRange(0, 3))
+	: VesselType(EVesselType::Undefined), GridLocation(0, 0), GridRotation(0), PlaceOnGrid(false)
 {
 	ThreeDeeModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Mesh"));
+	ThreeDeeModel->SetMobility(EComponentMobility::Movable);
 	RootComponent = ThreeDeeModel;
 
-	// Rotate the mesh the correct amount
-	RootComponent->RelativeRotation.Yaw = CurrentRotation * RotationAngle;
-
 	PrimaryActorTick.bCanEverTick = false;	// Don't tick every frame
-
 }
 
-// Called when the game starts or when spawned
-void AVessel::BeginPlay()
+// Called after constructor and properties are loaded
+void AVessel::PostInitProperties()
 {
-	Super::BeginPlay();
-	
+	SetRotationAmount(FMath::RandRange(0, 3));
+
+	Super::PostInitProperties();
 }
 
-// Called every frame
-void AVessel::Tick( float DeltaTime )
+// Called when the actor is clicked by the mouse
+void AVessel::ReceiveActorOnClicked()
 {
-	Super::Tick( DeltaTime );
+	SelectVessel();
+	Super::ReceiveActorOnClicked();
+}
 
+// Called when the actor is clicked by a finger on a touch device
+void AVessel::ReceiveActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
+{
+	SelectVessel();
+	Super::ReceiveActorOnInputTouchEnd(FingerIndex);
 }
 
 #if WITH_EDITOR
@@ -39,15 +45,39 @@ void AVessel::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChang
 {
 	//FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	
-	float rotationAmount = 0;
 	if (PlaceOnGrid) {		// Set the Vessel to be in its final location in the grid
-		rotationAmount = GridRotation * RotationAngle;
+		RootComponent->RelativeRotation.Yaw = GridRotation * RotationAngle;
 	}
 	else {		// Set the Vessel to be back in its current location
-		rotationAmount = CurrentRotation * RotationAngle;
+		RootComponent->RelativeRotation.Yaw = CurrentRotation * RotationAngle;
 	}
-	RootComponent->RelativeRotation.Yaw = rotationAmount;
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
+
+void AVessel::RotateRight()
+{
+	SetRotationAmount((CurrentRotation + 1 == 4) ? 0 : (CurrentRotation + 1));	// Increment or set to 0
+}
+
+void AVessel::RotateLeft()
+{
+	SetRotationAmount((CurrentRotation - 1 < 0) ? 3 : (CurrentRotation - 1));	// Decrement or set to 3
+}
+
+void AVessel::SelectVessel()
+{
+	// Inform the PlayerController
+	auto controller = Cast<AProjectMishkanPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (controller != NULL) {
+		controller->SelectPlaceable(this);
+	}
+}
+
+// Rotates the Vessel on the Z Axis to the set amount
+void AVessel::SetRotationAmount(uint8 Value)
+{
+	CurrentRotation = Value;
+	RootComponent->SetRelativeRotation(FRotator(0, CurrentRotation * RotationAngle, 0));
+}

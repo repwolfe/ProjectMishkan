@@ -13,12 +13,12 @@ UMishkanGridSquare::UMishkanGridSquare(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-const TArray<EVesselType>& UMishkanGridSquare::GetContainedVessels() const
+FORCEINLINE const TArray<EVesselType>& UMishkanGridSquare::GetContainedVessels() const
 {
 	return ContainedVessels;
 }
 
-void UMishkanGridSquare::SetContainedVessels(TArray<EVesselType>& in)
+FORCEINLINE void UMishkanGridSquare::SetContainedVessels(TArray<EVesselType>& in)
 {
 	ContainedVessels = in;
 }

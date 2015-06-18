@@ -3,7 +3,7 @@
 #include "ProjectMishkan.h"
 #include "MishkanGrid.h"
 #include "MishkanGridSquare.h"
-#include "../Model/MishkanGridSave.h"
+//#include "../Model/MishkanGridSave.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -49,7 +49,7 @@ void AMishkanGrid::CreateStaticMesh()
 	GridMesh = ConstructObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), this, TEXT("GridMesh"));
 	GridMesh->SetStaticMesh(GridCubeMesh);	// TODO: Check for null?
 	GridMesh->SetMaterial(0, GridMaterial);
-	GridMesh->SetRelativeLocation(FVector(0, 0, 300));		// TODO: Get its stored location
+	GridMesh->SetRelativeLocation(FVector(0, 0, 0));		// TODO: Get its stored location
 	GridMesh->SetRelativeScale3D(FVector(GridSize.X, GridSize.Y, 0.01f));
 	GridMesh->RegisterComponent();
 	RootComponent = GridMesh;
