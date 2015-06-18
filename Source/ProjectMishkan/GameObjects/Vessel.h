@@ -23,10 +23,10 @@ public:
 	virtual void PostInitProperties() override;
 
 	// Called when the actor is clicked by the mouse
-	virtual void ReceiveActorOnClicked() override;
+	virtual void NotifyActorOnClicked() override;
 
 	// Called when the actor is clicked by a finger on a touch device
-	virtual void ReceiveActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex) override;
+	virtual void NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex) override;
 
 	// Called when property is changed in the Unreal Editor
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;

@@ -26,17 +26,17 @@ void AVessel::PostInitProperties()
 }
 
 // Called when the actor is clicked by the mouse
-void AVessel::ReceiveActorOnClicked()
+void AVessel::NotifyActorOnClicked()
 {
 	SelectVessel();
-	Super::ReceiveActorOnClicked();
+	Super::NotifyActorOnClicked();
 }
 
 // Called when the actor is clicked by a finger on a touch device
-void AVessel::ReceiveActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
+void AVessel::NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
 {
 	SelectVessel();
-	Super::ReceiveActorOnInputTouchEnd(FingerIndex);
+	Super::NotifyActorOnInputTouchEnd(FingerIndex);
 }
 
 #if WITH_EDITOR

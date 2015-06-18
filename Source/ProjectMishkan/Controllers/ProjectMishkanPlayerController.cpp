@@ -17,6 +17,12 @@ AProjectMishkanPlayerController::AProjectMishkanPlayerController(const FObjectIn
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 }
 
+// Called every Frame
+void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
+{
+	Super::PlayerTick(deltaTime);
+}
+
 // Listens for player input and binds the appropriate functions
 void AProjectMishkanPlayerController::SetupInputComponent()
 {

@@ -14,6 +14,8 @@ class AProjectMishkanPlayerController : public APlayerController
 public:
 	AProjectMishkanPlayerController(const FObjectInitializer& ObjectInitializer);
 
+	virtual void PlayerTick(float deltaTime) override;
+
 	void SelectPlaceable(IPlaceable* placeable);
 
 private:
