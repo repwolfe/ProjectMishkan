@@ -31,6 +31,8 @@ public:
 	// Called when property is changed in the Unreal Editor
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	virtual FVector GetLocation() override;
+	virtual void SetLocation(FVector loc) override;
 	virtual void RotateRight() override;
 	virtual void RotateLeft() override;
 

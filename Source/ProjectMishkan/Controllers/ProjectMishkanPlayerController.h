@@ -3,6 +3,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraActor.h"
 #include "../Interfaces/IPlaceable.h"
+#include "../Model/BuildModes.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
 /** PlayerController class used to enable cursor */
@@ -27,12 +28,16 @@ private:
 	ACameraActor* GetFirstPersonCamera();
 	ACameraActor* GetCamera(const FString& Name);
 
-	// Input Handlers
+	// Event Handlers
 	void ChangeToMainCamera(float Value);
 	void ChangeToPlacementCamera(float Value);
 	void ChangeToFirstPersonCamera(float Value);
 	void RotateLeft();
 	void RotateRight();
+	void OnPress();
+	void OnRelease();
+	void PlaceCurrent();
+	void CancelPlacement();
 
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();
@@ -48,5 +53,8 @@ private:
 	ACameraActor* PlacementCamera;
 	ACameraActor* FirstPersonCamera;
 
+	EBuildMode BuildMode;
 	IPlaceable* Placeable;
+	FVector PlaceableLocation;
+	bool MousePressed;
 };

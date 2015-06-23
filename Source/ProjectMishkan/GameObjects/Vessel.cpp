@@ -56,6 +56,16 @@ void AVessel::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChang
 }
 #endif
 
+FVector AVessel::GetLocation()
+{
+	return GetActorLocation();
+}
+
+void AVessel::SetLocation(FVector loc)
+{
+	SetActorLocation(loc);
+}
+
 void AVessel::RotateRight()
 {
 	SetRotationAmount((CurrentRotation + 1 == 4) ? 0 : (CurrentRotation + 1));	// Increment or set to 0
