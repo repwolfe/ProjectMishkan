@@ -55,6 +55,5 @@ private:
 
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;
-	FVector PlaceableLocation;
 	bool MousePressed;
 };

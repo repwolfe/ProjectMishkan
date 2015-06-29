@@ -61,15 +61,21 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 {
 	Placeable = placeable;
-	PlaceableLocation = Placeable->GetLocation();
+	Placeable->SaveState();
 	ChangeToPlacementCamera();
 
-	// Update the camera's X/Y coordinates (but not Z) to the Placeable's location
+	// Update the camera's location to the Placeable's location
 	ACameraActor* camera = GetPlacementCamera();
 	FVector cameraLoc = camera->GetActorLocation();
-	cameraLoc.X = PlaceableLocation.X;
-	cameraLoc.Y = PlaceableLocation.Y;
+	FVector placeableLoc = Placeable->GetLocation();
+	cameraLoc.X = placeableLoc.X;
+	cameraLoc.Y = placeableLoc.Y;
+	cameraLoc.Z = IPlaceable::CameraOffset * 2;		// Be twice as high as the Placeable is
 	camera->SetActorLocation(cameraLoc);
+
+	// Bring the Placeable closer to the screen (relative to the Placement camera)
+	placeableLoc.Z = IPlaceable::CameraOffset;
+	Placeable->SetLocation(placeableLoc);
 
 	BuildMode = EBuildMode::Placement;
 }
@@ -162,7 +168,7 @@ void AProjectMishkanPlayerController::CancelPlacement()
 {
 	ChangeToMainCamera();
 	if (BuildMode == EBuildMode::Placement) {
-		Placeable->SetLocation(PlaceableLocation);
+		Placeable->ResetState();
 		Placeable = NULL;
 		BuildMode = EBuildMode::Selection;
 	}

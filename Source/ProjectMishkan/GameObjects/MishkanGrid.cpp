@@ -46,7 +46,7 @@ void AMishkanGrid::CreateStaticMesh()
 	if (GridMesh != NULL) {
 		GridMesh->DestroyComponent();
 	}
-	GridMesh = NewNamedObject<UStaticMeshComponent>(this, TEXT("GridMesh"));
+	GridMesh = NewObject<UStaticMeshComponent>(this, TEXT("GridMesh"));
 	GridMesh->SetStaticMesh(GridCubeMesh);	// TODO: Check for null?
 	GridMesh->SetMaterial(0, GridMaterial);
 	GridMesh->SetRelativeLocation(FVector(0, 0, 0));		// TODO: Get its stored location
@@ -74,7 +74,7 @@ void AMishkanGrid::CreateGridSquares()
 	for (uint8 width = 0; width < GridSize.X; ++width) {
 		for (uint8 height = 0; height < GridSize.Y; ++height) {
 			const FVector squareLocation = FVector(currentX + centerOffsetX, currentY + centerOffsetY, 2.0f);
-			UMishkanGridSquare* newSquare = NewNamedObject<UMishkanGridSquare>(this, *FString::Printf(TEXT("GridSquare%d"), i++));
+			UMishkanGridSquare* newSquare = NewObject<UMishkanGridSquare>(this, *FString::Printf(TEXT("GridSquare%d"), i++));
 			newSquare->RegisterComponent();	// TODO: Check for null?
 			newSquare->SetRelativeLocation(squareLocation);
 			newSquare->SetRelativeScale3D(squareScale);
