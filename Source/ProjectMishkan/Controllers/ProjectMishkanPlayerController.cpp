@@ -54,6 +54,7 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("RotateRight", IE_Released, this, &AProjectMishkanPlayerController::RotateRight);
 	InputComponent->BindAction("OnPress", IE_Pressed, this, &AProjectMishkanPlayerController::OnPress);
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
+	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
 }
 
@@ -158,10 +159,30 @@ void AProjectMishkanPlayerController::OnRelease()
 	MousePressed = false;
 }
 
-void AProjectMishkanPlayerController::PlaceCurrent()
+void AProjectMishkanPlayerController::PlaceCurrent(IPlaceable* finalPlacement)
 {
 	ChangeToMainCamera();
+	Placeable->PlaceAt(finalPlacement);
+	Placeable = NULL;
 	BuildMode = EBuildMode::Selection;
+}
+
+/**
+ * Attempt to place the current Placeable at the current spot
+ * Will only succeed if currently overlapping an equivalent 
+ * (but hidden) Placeable marker
+ * TODO: Build order
+ */
+void AProjectMishkanPlayerController::AttemptPlacement()
+{
+	if (BuildMode == EBuildMode::Placement) {
+		auto overlapped = Placeable->GetWhatsOverlapped();
+		for (IPlaceable* other : overlapped) {
+			if (Placeable->CanPlaceAt(other)) {
+				PlaceCurrent(other);
+			}
+		}
+	}
 }
 
 void AProjectMishkanPlayerController::CancelPlacement()

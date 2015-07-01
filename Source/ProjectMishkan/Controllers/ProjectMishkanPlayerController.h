@@ -36,7 +36,8 @@ private:
 	void RotateRight();
 	void OnPress();
 	void OnRelease();
-	void PlaceCurrent();
+	void PlaceCurrent(IPlaceable* finalPlacement);
+	void AttemptPlacement();
 	void CancelPlacement();
 
 	// Helper functions to switch the current camera
