@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "../Model/VesselTypes.h"
 #include "../Model/VesselBuildStages.h"
+#include "../Model/VesselBuildSteps.h"
 #include "../Interfaces/IPlaceable.h"
 #include "Vessel.generated.h"
 
@@ -79,6 +80,9 @@ private:
 
 	UPROPERTY(Category = Mishkan, EditAnywhere)
 	EVesselBuildStage BuildStage;
+
+	UPROPERTY(Category = Mishkan, EditAnywhere)
+	EVesselBuildStep BuildStep;
 
 	// TODO: Remove this??
 	// The final location of this Vessel in the Mishkan

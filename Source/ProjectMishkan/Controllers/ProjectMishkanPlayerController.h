@@ -4,6 +4,7 @@
 #include "Camera/CameraActor.h"
 #include "../Interfaces/IPlaceable.h"
 #include "../Model/BuildModes.h"
+#include "../Model/BuildOrder.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
 /** PlayerController class used to enable cursor */
@@ -57,4 +58,6 @@ private:
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;
 	bool MousePressed;
+
+	UBuildOrder BuildOrder;
 };

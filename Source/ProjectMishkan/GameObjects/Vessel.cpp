@@ -9,7 +9,7 @@ const uint8 AVessel::BoundingBoxBufferScale = 3;
 
 // Sets default values
 AVessel::AVessel()
-	: VesselType(EVesselType::Undefined), BuildStage(EVesselBuildStage::Hidden), FirstTimeCreating(true)
+	: VesselType(EVesselType::Undefined), BuildStage(EVesselBuildStage::Hidden), BuildStep(EVesselBuildStep::Undefined), FirstTimeCreating(true)
 {
 	ThreeDeeModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Mesh"));
 	ThreeDeeModel->SetMobility(EComponentMobility::Movable);
@@ -194,13 +194,13 @@ void AVessel::SetBuildStage(EVesselBuildStage Value)
 	}
 	switch (Value) {
 		case EVesselBuildStage::Hidden:
-			// TODO: Set Visiblity to zero
+			//SetActorHiddenInGame(true);
 			CreateTriggerBox();
 			break;
 		case EVesselBuildStage::Available:
 			rotationAmount = FMath::RandRange(0, 3);
 		case EVesselBuildStage::Built:		// Both Available and Built do this
-			// TODO: Make Visible
+			//SetActorHiddenInGame(false);
 			RemoveTriggerBox();
 			break;
 		default:		// Invalid value
