@@ -9,7 +9,7 @@ const uint8 AVessel::BoundingBoxBufferScale = 3;
 
 // Sets default values
 AVessel::AVessel()
-	: VesselType(EVesselType::Undefined), BuildStage(EVesselBuildStage::Hidden), BuildStep(EVesselBuildStep::Undefined), FirstTimeCreating(true)
+	: BuildStep(EBuildStep::Undefined), BuildStage(EVesselBuildStage::Hidden), FirstTimeCreating(true)
 {
 	ThreeDeeModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("3D Mesh"));
 	ThreeDeeModel->SetMobility(EComponentMobility::Movable);
@@ -62,7 +62,9 @@ void AVessel::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChang
 {
 	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(AVessel, BuildStage)) {
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AVessel, BuildStage) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(AVessel, FinalRotations)) {
+		// Set the Build Stage and Current Rotation accordingly
 		SetBuildStage(BuildStage);
 	}
 
@@ -73,13 +75,13 @@ void AVessel::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChang
 /**
  * @returns true if this Vessel can be placed where finalPlacement is located by checking if
  * a) finalPlacement is also a Vessel
- * b) Both Vessels have the same VesselType
+ * b) Both Vessels have the same Build Step
  * c) this is rotated a valid amount
  */
 bool AVessel::CanPlaceAt(IPlaceable* finalPlacement)
 {
 	AVessel* finalVessel = Cast<AVessel>(finalPlacement);
-	if (finalVessel && VesselType == finalVessel->VesselType) {
+	if (finalVessel != NULL && BuildStep == finalVessel->BuildStep) {
 		for (uint8 validRotation : finalVessel->FinalRotations) {
 			if (CurrentRotation == validRotation) {
 				return true;
@@ -99,6 +101,11 @@ void AVessel::PlaceAt(IPlaceable* finalPlacement)
 	AVessel* vessel = Cast<AVessel>(finalPlacement);
 	vessel->SetBuildStage(EVesselBuildStage::Built);
 	Destroy();
+}
+
+FORCEINLINE EBuildStep AVessel::GetBuildStep()
+{
+	return BuildStep;
 }
 
 FVector AVessel::GetLocation()
@@ -146,16 +153,21 @@ FORCEINLINE const std::list<IPlaceable*>& AVessel::GetWhatsOverlapped() const
  */
 void AVessel::CreateTriggerBox()
 {
+	if (TriggerBox == NULL)
+	{
+		TriggerBox = NewObject<UBoxComponent>(this, TEXT("TriggerBox"));
+		TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AVessel::OnBeginOverlap);
+		TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AVessel::OnEndOverlap);
+		TriggerBox->RegisterComponent();
+		TriggerBox->AttachTo(RootComponent);
+	}
+
+	// Adjust the size of the Trigger Box
 	auto BoundingBox = ThreeDeeModel->Bounds.BoxExtent;
 	BoundingBox *= BoundingBoxBufferScale;
-
-	TriggerBox = NewObject<UBoxComponent>(this, TEXT("TriggerBox"));
-	TriggerBox->AttachTo(RootComponent);
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AVessel::OnBeginOverlap);
-	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AVessel::OnEndOverlap);
 	TriggerBox->SetRelativeLocation(FVector(0, 0, CameraOffset));
+	BoundingBox.Z = 100;	// TODO: Set to Constant
 	TriggerBox->SetBoxExtent(BoundingBox);
-	TriggerBox->RegisterComponent();
 }
 
 void AVessel::RemoveTriggerBox()

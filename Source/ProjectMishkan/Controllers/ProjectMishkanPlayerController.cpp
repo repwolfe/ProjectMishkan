@@ -15,6 +15,8 @@ AProjectMishkanPlayerController::AProjectMishkanPlayerController(const FObjectIn
 	bEnableClickEvents = true;
 	bEnableTouchEvents = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+
+	BuildOrder = NewObject<UBuildOrder>(this, TEXT("BuildOrder"));
 }
 
 // Called every Frame
@@ -169,18 +171,25 @@ void AProjectMishkanPlayerController::PlaceCurrent(IPlaceable* finalPlacement)
 
 /**
  * Attempt to place the current Placeable at the current spot
- * Will only succeed if currently overlapping an equivalent 
- * (but hidden) Placeable marker
- * TODO: Build order
+ * Will only succeed if we're at the correct step of building and are
+ * currently overlapping an equivalent (but hidden) Placeable marker
  */
 void AProjectMishkanPlayerController::AttemptPlacement()
 {
 	if (BuildMode == EBuildMode::Placement) {
-		auto overlapped = Placeable->GetWhatsOverlapped();
-		for (IPlaceable* other : overlapped) {
-			if (Placeable->CanPlaceAt(other)) {
-				PlaceCurrent(other);
+		if (BuildOrder->CanBuild(Placeable)) {
+			auto overlapped = Placeable->GetWhatsOverlapped();
+			for (IPlaceable* other : overlapped) {
+				if (Placeable->CanPlaceAt(other)) {
+					BuildOrder->Build();
+					PlaceCurrent(other);
+					return;
+				}
 			}
+			// TODO: Message to user indicating incorrect placement
+		}
+		else {
+			// TODO: Message to user indicating incorrect build step
 		}
 	}
 }

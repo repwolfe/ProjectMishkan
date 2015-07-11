@@ -59,5 +59,5 @@ private:
 	IPlaceable* Placeable;
 	bool MousePressed;
 
-	UBuildOrder BuildOrder;
+	UBuildOrder* BuildOrder;
 };

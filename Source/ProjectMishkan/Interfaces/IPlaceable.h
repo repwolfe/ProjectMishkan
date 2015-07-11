@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include "../Model/BuildSteps.h"
 #include "IPlaceable.generated.h"
 
 // Boilerplate code to allow for an Unreal Interface
@@ -14,6 +15,7 @@ class PROJECTMISHKAN_API IPlaceable {
 	GENERATED_IINTERFACE_BODY()
 
 public:
+	virtual EBuildStep GetBuildStep() = 0;
 	virtual FVector GetLocation() = 0;
 	virtual const std::list<IPlaceable*>& GetWhatsOverlapped() const = 0;
 	virtual void SetLocation(FVector loc) = 0;
@@ -24,5 +26,5 @@ public:
 	virtual bool CanPlaceAt(IPlaceable* finalPlacement) = 0;
 	virtual void PlaceAt(IPlaceable* finalPlacement) = 0;
 
-	static const uint8 CameraOffset;	// How far up to move the Placeable when in Placement mode
+	static const uint16 CameraOffset;	// How far up to move the Placeable when in Placement mode
 };

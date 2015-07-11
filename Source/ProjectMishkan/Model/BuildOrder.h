@@ -1,6 +1,8 @@
 #pragma once
 
-#include "VesselBuildSteps.h"
+#include <vector>
+#include <map>
+#include "../Interfaces/IPlaceable.h"
 #include "BuildOrder.generated.h"
 
 /**
@@ -12,11 +14,16 @@ class PROJECTMISHKAN_API UBuildOrder : public UObject {
 
 public:
 	UBuildOrder();
-	EVesselBuildStep Current();
+	bool CanBuild(IPlaceable* placeable);
+	void Build();
 
 private:
-	void Next();
+	EBuildStep Current();
 
-	TArray<EVesselBuildStep> BuildSteps;
+	static const std::vector<EBuildStep> BuildSteps;
+	static const uint8 NumSteps;
+	static const std::map<EBuildStep, uint8> VesselsPerStep;
+
 	uint8 CurrentStep;
+	uint8 VesselsBuildThisStep;
 };

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "../Model/BuildSteps.h"
 #include "../Model/VesselTypes.h"
 #include "../Model/VesselBuildStages.h"
-#include "../Model/VesselBuildSteps.h"
 #include "../Interfaces/IPlaceable.h"
 #include "Vessel.generated.h"
 
@@ -36,6 +36,7 @@ public:
 	// Called when property is changed in the Unreal Editor
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	virtual EBuildStep GetBuildStep() override;
 	virtual FVector GetLocation() override;
 	virtual const std::list<IPlaceable*>& GetWhatsOverlapped() const override;
 	virtual void SetLocation(FVector loc) override;
@@ -75,14 +76,14 @@ private:
 	// How many degrees a single rotation does
 	static const uint8 RotationAngle;
 
-	UPROPERTY(Category = Mishkan, EditAnywhere)
-	EVesselType VesselType;
+	//UPROPERTY(Category = Mishkan, EditAnywhere)
+	//EVesselType VesselType;
 
 	UPROPERTY(Category = Mishkan, EditAnywhere)
 	EVesselBuildStage BuildStage;
 
 	UPROPERTY(Category = Mishkan, EditAnywhere)
-	EVesselBuildStep BuildStep;
+	EBuildStep BuildStep;
 
 	// TODO: Remove this??
 	// The final location of this Vessel in the Mishkan

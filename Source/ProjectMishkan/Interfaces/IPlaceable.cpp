@@ -1,7 +1,7 @@
 #include "ProjectMishkan.h"
 #include "IPlaceable.h"
 
-const uint8 IPlaceable::CameraOffset = 100;
+const uint16 IPlaceable::CameraOffset = 1000;
 
 UPlaceable::UPlaceable(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
