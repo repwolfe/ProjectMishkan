@@ -194,7 +194,11 @@ void AVessel::SelectVessel()
 void AVessel::SetRotationAmount(uint8 Value)
 {
 	CurrentRotation = Value;
-	RootComponent->SetRelativeRotation(FRotator(0, CurrentRotation * RotationAngle, 0));
+	FRotator rotation(0, CurrentRotation * RotationAngle, 0);
+	RootComponent->SetRelativeRotation(rotation);
+	if (TriggerBox != NULL) {
+		TriggerBox->SetRelativeRotation(rotation);
+	}
 }
 
 void AVessel::SetBuildStage(EVesselBuildStage Value)

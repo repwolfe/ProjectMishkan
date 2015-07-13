@@ -24,7 +24,7 @@ void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
 	// If in placement mode, check if mouse pressed and dragged, move camera/placeable
 	if (BuildMode == EBuildMode::Placement && MousePressed) {
-		const uint8 SCALE_VALUE = 5;
+		const uint8 SCALE_VALUE = 20;
 		float deltaX = 0, deltaY = 0;
 		GetInputMouseDelta(deltaX, deltaY);		// TODO: Make work for touch screen
 
@@ -63,6 +63,11 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 // Start placing the selected Vessel
 void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 {
+	if (BuildMode == EBuildMode::Placement) {
+		// Already in placement mode, ignore selections
+		return;
+	}
+
 	Placeable = placeable;
 	Placeable->SaveState();
 	ChangeToPlacementCamera();

@@ -4,7 +4,6 @@
 
 #include "GameFramework/Actor.h"
 #include "../Model/BuildSteps.h"
-#include "../Model/VesselTypes.h"
 #include "../Model/VesselBuildStages.h"
 #include "../Interfaces/IPlaceable.h"
 #include "Vessel.generated.h"
@@ -76,27 +75,15 @@ private:
 	// How many degrees a single rotation does
 	static const uint8 RotationAngle;
 
-	//UPROPERTY(Category = Mishkan, EditAnywhere)
-	//EVesselType VesselType;
-
 	UPROPERTY(Category = Mishkan, EditAnywhere)
 	EVesselBuildStage BuildStage;
 
 	UPROPERTY(Category = Mishkan, EditAnywhere)
 	EBuildStep BuildStep;
 
-	// TODO: Remove this??
-	// The final location of this Vessel in the Mishkan
-	//UPROPERTY(Category = Mishkan, EditAnywhere, meta = (ClampMin = "0", UIMin = "0"))
-	//FIntPoint GridLocation;
-
 	// The final rotation amounts of this Vessel in the Mishkan (how many quarter turns)
 	UPROPERTY(Category = Mishkan, EditAnywhere)
 	TArray<uint8> FinalRotations;
-
-	// Place the Vessel in its final location or not
-	//UPROPERTY(Category = Mishkan, EditAnywhere)
-	//bool PlaceOnGrid;
 
 	// The Vessel's current rotation amount (how many quarter turns)
 	UPROPERTY(Category = Mishkan, VisibleAnywhere, meta = (ClampMin = "0", ClampMax = "3"))
