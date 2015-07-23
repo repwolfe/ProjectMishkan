@@ -23,6 +23,8 @@ public:
 private:
 	virtual void SetupInputComponent() override;
 
+	void SetBuildMode(EBuildMode mode);
+
 	// Helper functions to lazy load camera pointers
 	ACameraActor* GetMainCamera();
 	ACameraActor* GetPlacementCamera();
@@ -31,7 +33,6 @@ private:
 
 	// Event Handlers
 	void ChangeToMainCamera(float Value);
-	void ChangeToPlacementCamera(float Value);
 	void ChangeToFirstPersonCamera(float Value);
 	void RotateLeft();
 	void RotateRight();

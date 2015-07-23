@@ -1,6 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
 #include "ProjectMishkan.h"
+#include "../GameObjects/MishkanHUD.h"
 #include "ProjectMishkanPlayerController.h"
 #include "EngineUtils.h"
 
@@ -50,7 +51,6 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 
 	check(InputComponent);
 	InputComponent->BindAction("SwitchToMainCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToMainCamera);
-	InputComponent->BindAction("SwitchToPlacementCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToPlacementCamera);
 	InputComponent->BindAction("SwitchToFirstPersonCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToFirstPersonCamera);
 	InputComponent->BindAction("RotateLeft", IE_Released, this, &AProjectMishkanPlayerController::RotateLeft);
 	InputComponent->BindAction("RotateRight", IE_Released, this, &AProjectMishkanPlayerController::RotateRight);
@@ -58,6 +58,23 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
 	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
+}
+
+void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
+{
+	BuildMode = mode;
+
+	// Inform the HUD of the change in Mode
+	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
+	if (HUD) {
+		// TODO: Find a better place to put this, since it only needs to be done once
+		FRotationDelegate rotateLeftF, rotateRightF;
+		rotateLeftF.BindUObject(this, &AProjectMishkanPlayerController::RotateLeft);
+		rotateRightF.BindUObject(this, &AProjectMishkanPlayerController::RotateRight);
+		HUD->SetRotationHandlers(rotateLeftF, rotateRightF);
+
+		HUD->SetBuildMode(mode);
+	}
 }
 
 // Start placing the selected Vessel
@@ -85,7 +102,7 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 	placeableLoc.Z = IPlaceable::CameraOffset;
 	Placeable->SetLocation(placeableLoc);
 
-	BuildMode = EBuildMode::Placement;
+	SetBuildMode(EBuildMode::Placement);
 }
 
 // Lazy loads Main Camera pointer
@@ -129,16 +146,13 @@ FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetCamera(const FStri
 // Event handlers
 void AProjectMishkanPlayerController::ChangeToMainCamera(float Value)
 {
+	SetBuildMode(EBuildMode::Selection);
 	ChangeToMainCamera();
-}
-
-void AProjectMishkanPlayerController::ChangeToPlacementCamera(float Value)
-{
-	ChangeToPlacementCamera();
 }
 
 void AProjectMishkanPlayerController::ChangeToFirstPersonCamera(float Value)
 {
+	SetBuildMode(EBuildMode::FirstPerson);
 	ChangeToFirstPersonCamera();
 }
 
@@ -171,7 +185,7 @@ void AProjectMishkanPlayerController::PlaceCurrent(IPlaceable* finalPlacement)
 	ChangeToMainCamera();
 	Placeable->PlaceAt(finalPlacement);
 	Placeable = NULL;
-	BuildMode = EBuildMode::Selection;
+	SetBuildMode(EBuildMode::Selection);
 }
 
 /**
@@ -205,7 +219,7 @@ void AProjectMishkanPlayerController::CancelPlacement()
 	if (BuildMode == EBuildMode::Placement) {
 		Placeable->ResetState();
 		Placeable = NULL;
-		BuildMode = EBuildMode::Selection;
+		SetBuildMode(EBuildMode::Selection);
 	}
 }
 

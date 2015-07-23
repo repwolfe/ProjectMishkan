@@ -3,12 +3,13 @@
 #include "ProjectMishkan.h"
 #include "ProjectMishkanGameMode.h"
 #include "ProjectMishkanPlayerController.h"
+#include "../GameObjects/MishkanHUD.h"
 
 AProjectMishkanGameMode::AProjectMishkanGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	// no pawn by default
 	DefaultPawnClass = NULL;
-	// use our own player controller class
+	HUDClass = AMishkanHUD::StaticClass();
 	PlayerControllerClass = AProjectMishkanPlayerController::StaticClass();
 }
