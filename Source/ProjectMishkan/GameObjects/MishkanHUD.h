@@ -3,9 +3,10 @@
 #include "GameFramework/HUD.h"
 #include "Engine/Canvas.h"
 #include "../Model/BuildModes.h"
+#include "../Model/HUDButtons.h"
 #include "MishkanHUD.generated.h"
 
-DECLARE_DELEGATE(FRotationDelegate)
+DECLARE_DELEGATE(FHUDButtonDelegate)
 
 // Container for a Button that appears in the HUD
 struct FHUDButton
@@ -14,6 +15,8 @@ struct FHUDButton
 	FVector2D Position;
 	FVector2D Size;
 	FName Name;
+	FHUDButtonDelegate OnClick;
+
 	FHUDButton(FCanvasIcon Tex, FVector2D Pos, FVector2D Siz, FName Nam)
 	{
 		Texture = Tex;
@@ -37,7 +40,7 @@ public:
 	virtual void NotifyHitBoxClick(FName BoxName) override;
 
 	void SetBuildMode(EBuildMode mode);
-	void SetRotationHandlers(FRotationDelegate RotateLeftF, FRotationDelegate RotateRightF);
+	void SetPlacementHandlers(FHUDButtonDelegate* delegates);
 	
 private:
 	void UpdateScale();
@@ -46,10 +49,6 @@ private:
 
 	// Graphic elements
 	float ScaleUI;
-	FHUDButton RotateLeft;
-	FHUDButton RotateRight;
-
-	FRotationDelegate RotateLeftHandler;
-	FRotationDelegate RotateRightHandler;
+	FHUDButton PlacementButtons[EPlacementButton::Size];
 	EBuildMode CurrentBuildMode;
 };

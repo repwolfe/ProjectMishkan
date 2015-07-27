@@ -20,6 +20,23 @@ AProjectMishkanPlayerController::AProjectMishkanPlayerController(const FObjectIn
 	BuildOrder = NewObject<UBuildOrder>(this, TEXT("BuildOrder"));
 }
 
+// Called when the HUD is changed
+void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< class AHUD > NewHUDClass)
+{
+	Super::ClientSetHUD_Implementation(NewHUDClass);
+
+	// Assume it's MishkanHUD
+	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
+	if (HUD) {
+		FHUDButtonDelegate handlers[EPlacementButton::Size];
+		handlers[EPlacementButton::RotateLeft].BindUObject(this, &AProjectMishkanPlayerController::RotateLeft);
+		handlers[EPlacementButton::RotateRight].BindUObject(this, &AProjectMishkanPlayerController::RotateRight);
+		handlers[EPlacementButton::Okay].BindUObject(this, &AProjectMishkanPlayerController::AttemptPlacement);
+		handlers[EPlacementButton::Cancel].BindUObject(this, &AProjectMishkanPlayerController::CancelPlacement);
+		HUD->SetPlacementHandlers(handlers);
+	}
+}
+
 // Called every Frame
 void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
@@ -67,12 +84,6 @@ void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
 	// Inform the HUD of the change in Mode
 	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
 	if (HUD) {
-		// TODO: Find a better place to put this, since it only needs to be done once
-		FRotationDelegate rotateLeftF, rotateRightF;
-		rotateLeftF.BindUObject(this, &AProjectMishkanPlayerController::RotateLeft);
-		rotateRightF.BindUObject(this, &AProjectMishkanPlayerController::RotateRight);
-		HUD->SetRotationHandlers(rotateLeftF, rotateRightF);
-
 		HUD->SetBuildMode(mode);
 	}
 }

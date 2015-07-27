@@ -7,8 +7,10 @@ AMishkanHUD::AMishkanHUD(const FObjectInitializer& ObjectInitializer)
 {
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonsTextureOb(TEXT("/Game/UI/HUD/Buttons"));
 	UTexture2D* ButtonsTexture = ButtonsTextureOb.Object;
-	RotateLeft = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 30, 30, 140, 140), TEXT("RotateLeft"));
-	RotateRight = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 30, 200, 140, 140), TEXT("RotateRight"));
+	PlacementButtons[EPlacementButton::RotateLeft] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 50, 250, 250), TEXT("RotateLeft"));
+	PlacementButtons[EPlacementButton::RotateRight] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 350, 250, 250), TEXT("RotateRight"));
+	PlacementButtons[EPlacementButton::Okay] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 650, 180, 180), TEXT("Okay"));
+	PlacementButtons[EPlacementButton::Cancel] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 880, 180, 180), TEXT("Cancel"));
 }
 
 // Custom implementation of Draw, called every frame
@@ -34,23 +36,21 @@ void AMishkanHUD::NotifyHitBoxClick(FName BoxName)
 {
 	Super::NotifyHitBoxClick(BoxName);
 
-	// Rotation Buttons
-	if (BoxName == RotateLeft.Name) {
-		RotateLeftHandler.ExecuteIfBound();
-	}
-	else if (BoxName == RotateRight.Name) {
-		RotateRightHandler.ExecuteIfBound();
+	for (uint8 i = 0; i < EPlacementButton::Size; ++i) {
+		if (BoxName == PlacementButtons[i].Name) {
+			PlacementButtons[i].OnClick.ExecuteIfBound();
+			return;		// No point continuing, hit box names are unique
+		}
 	}
 }
 
 // Set handlers for when rotation buttons are pressed
-void AMishkanHUD::SetRotationHandlers(FRotationDelegate RotateLeftF, FRotationDelegate RotateRightF)
+void AMishkanHUD::SetPlacementHandlers(FHUDButtonDelegate* delegates)
 {
-	if (!RotateLeftHandler.IsBound()) {
-		RotateLeftHandler = RotateLeftF;
-	}
-	if (!RotateRightHandler.IsBound()) {
-		RotateRightHandler = RotateRightF;
+	for (uint8 i = 0; i < EPlacementButton::Size; ++i) {
+		if (!PlacementButtons[i].OnClick.IsBound()) {
+			PlacementButtons[i].OnClick = delegates[i];
+		}
 	}
 }
 
@@ -66,23 +66,46 @@ void AMishkanHUD::UpdatePlacementHUD()
 	const float Offset = 75.f;
 
 	// Position the Rotation Buttons
-	float StartX = Canvas->OrgX + Offset * ScaleUI;
-	float StartY = Canvas->ClipY / 2.0f;
-	RotateLeft.Position = FVector2D(StartX, StartY - (RotateLeft.Size.Y / 2.0f) * ScaleUI);
-	StartX = Canvas->ClipX - Offset * ScaleUI;
-	RotateRight.Position = FVector2D(StartX - (RotateRight.Size.X * ScaleUI), StartY - (RotateRight.Size.Y / 2.0f) * ScaleUI);
+	FHUDButton* button;
+	float StartX, StartY;
+
+	// Left Rotation Button
+	button = &PlacementButtons[EPlacementButton::RotateLeft];
+	StartX = Canvas->OrgX + Offset * ScaleUI;
+	StartY = Canvas->SizeY / 2.0f;
+	button->Position = FVector2D(StartX, StartY - (button->Size.Y / 2.0f) * ScaleUI);
+
+	// Right Rotation Button (same Y)
+	button = &PlacementButtons[EPlacementButton::RotateRight];
+	StartX = Canvas->SizeX - Offset * ScaleUI;
+	button->Position = FVector2D(StartX - (button->Size.X * ScaleUI), StartY - (button->Size.Y / 2.0f) * ScaleUI);
 	
-	// Add invisible HitBoxes that detect when the rotation buttons are clicked
-	AddHitBox(RotateLeft.Position, RotateLeft.Size, RotateLeft.Name, false);
-	AddHitBox(RotateRight.Position, RotateRight.Size, RotateRight.Name, false);
+	// Okay button
+	button = &PlacementButtons[EPlacementButton::Okay];
+	StartX = Canvas->SizeX / 2.0f - 1.5f * Offset * ScaleUI;
+	StartY = Canvas->SizeY - Offset * ScaleUI;
+	button->Position = FVector2D(StartX - (button->Size.X / 2.0f) * ScaleUI, StartY - button->Size.Y * ScaleUI);
+
+	// Cancel button (same X)
+	button = &PlacementButtons[EPlacementButton::Cancel];
+	StartX = Canvas->SizeX / 2.0f + 1.5f * Offset * ScaleUI;
+	button->Position = FVector2D(StartX + (button->Size.X / 2.0f) * ScaleUI, StartY - button->Size.Y * ScaleUI);
+
+	// Add invisible HitBoxes that detect when the buttons are clicked
+	for (uint8 i = 0; i < EPlacementButton::Size; ++i) {
+		button = &PlacementButtons[i];
+		AddHitBox(button->Position, button->Size, button->Name, false);
+	}
 }
 
 // Draws relevant controls/information for Placement mode
-FORCEINLINE void AMishkanHUD::DrawPlacementHUD()
+void AMishkanHUD::DrawPlacementHUD()
 {
-	// Rotation buttons
-	Canvas->DrawIcon(RotateLeft.Texture, RotateLeft.Position.X, RotateLeft.Position.Y, ScaleUI);
-	Canvas->DrawIcon(RotateRight.Texture, RotateRight.Position.X, RotateRight.Position.Y, ScaleUI);
+	FHUDButton* button;
+	for (uint8 i = 0; i < EPlacementButton::Size; ++i) {
+		button = &PlacementButtons[i];
+		Canvas->DrawIcon(button->Texture, button->Position.X, button->Position.Y, ScaleUI);
+	}
 }
 
 // Called to inform this what is the current build mode

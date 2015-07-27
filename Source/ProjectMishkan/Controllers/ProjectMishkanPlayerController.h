@@ -16,6 +16,7 @@ class AProjectMishkanPlayerController : public APlayerController
 public:
 	AProjectMishkanPlayerController(const FObjectInitializer& ObjectInitializer);
 
+	virtual void ClientSetHUD_Implementation(TSubclassOf< class AHUD > NewHUDClass) override;
 	virtual void PlayerTick(float deltaTime) override;
 
 	void SelectPlaceable(IPlaceable* placeable);
