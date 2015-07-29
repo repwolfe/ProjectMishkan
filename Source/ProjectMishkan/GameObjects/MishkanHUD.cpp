@@ -94,7 +94,7 @@ void AMishkanHUD::UpdatePlacementHUD()
 	// Add invisible HitBoxes that detect when the buttons are clicked
 	for (uint8 i = 0; i < EPlacementButton::Size; ++i) {
 		button = &PlacementButtons[i];
-		AddHitBox(button->Position, button->Size, button->Name, false);
+		AddHitBox(button->Position, button->Size * ScaleUI, button->Name, false);
 	}
 }
 
