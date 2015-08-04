@@ -3,7 +3,7 @@ rem If not provided, default values (which can be edited below) are set
 
 set UnrealExe=UE4Editor.exe
 set Project=ProjectMishkan.uproject
-set DefaultUnrealLoc="D:\Program Files\Epic Games\4.7\Engine\Binaries\Win64\"
+set DefaultUnrealLoc="D:\Program Files\Epic Games\4.8\Engine\Binaries\Win64\"
 
 rem Available platforms to target are WindowsNoEditor, WindowsServer, LinuxServer, PS4, XboxOne, IOS, Android
 set DefaultTarget=WindowsNoEditor

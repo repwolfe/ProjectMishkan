@@ -25,7 +25,7 @@ void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< c
 {
 	Super::ClientSetHUD_Implementation(NewHUDClass);
 
-	// Assume it's MishkanHUD
+	// If it's MishkanHUD
 	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
 	if (HUD) {
 		FHUDButtonDelegate handlers[EPlacementButton::Size];
@@ -34,28 +34,41 @@ void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< c
 		handlers[EPlacementButton::Okay].BindUObject(this, &AProjectMishkanPlayerController::AttemptPlacement);
 		handlers[EPlacementButton::Cancel].BindUObject(this, &AProjectMishkanPlayerController::CancelPlacement);
 		HUD->SetPlacementHandlers(handlers);
+		HUD->OnNewOwningPlayerController(this);
 	}
 }
 
 // Called every Frame
 void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
-	// If in placement mode, check if mouse pressed and dragged, move camera/placeable
-	if (BuildMode == EBuildMode::Placement && MousePressed) {
-		const uint8 SCALE_VALUE = 20;
-		float deltaX = 0, deltaY = 0;
-		GetInputMouseDelta(deltaX, deltaY);		// TODO: Make work for touch screen
+	if (CurrentCamera == NULL) {
+		ChangeToMainCamera();		// At the start use the main camera
+		//bool worked = FInternationalization::Get().SetCurrentCulture(TEXT("he"));
+		SetBuildMode(EBuildMode::Selection);
+	}
 
-		FVector loc = Placeable->GetLocation();
-		loc.X += deltaY * SCALE_VALUE;		// Mouse coordinates and World coordinates are transpose of each other
-		loc.Y += deltaX * SCALE_VALUE;
-		Placeable->SetLocation(loc);
+	// If in selection/placement mode, check if mouse pressed and dragged, move camera/placeable
+	if (MousePressed) {
+		const uint8 SCALE_VALUE = 20;	// TODO: Move this somewhere else, and pick a good value
+		float mouseDeltaX = 0, mouseDeltaY = 0;
+		GetInputMouseDelta(mouseDeltaX, mouseDeltaY);		// TODO: Make work for touch screen
 
-		ACameraActor* camera = GetPlacementCamera();
-		FVector cameraLoc = camera->GetActorLocation();
-		cameraLoc.X = loc.X;
-		cameraLoc.Y = loc.Y;
-		camera->SetActorLocation(cameraLoc);
+		// Mouse coordinates and World coordinates are transpose of each other
+		FVector2D delta(mouseDeltaY * SCALE_VALUE, mouseDeltaX * SCALE_VALUE);
+
+		// Move the camera as the player drags
+		if (BuildMode == EBuildMode::Selection || BuildMode == EBuildMode::Placement) {
+			FVector cameraLoc = CurrentCamera->GetActorLocation();
+			cameraLoc.X += delta.X;
+			cameraLoc.Y += delta.Y;
+			CurrentCamera->SetActorLocation(cameraLoc);
+		}
+		if (BuildMode == EBuildMode::Placement) {
+			FVector loc = Placeable->GetLocation();
+			loc.X += delta.X;
+			loc.Y += delta.Y;
+			Placeable->SetLocation(loc);
+		}
 	}
 
 	Super::PlayerTick(deltaTime);
@@ -85,6 +98,7 @@ void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
 	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
 	if (HUD) {
 		HUD->SetBuildMode(mode);
+		HUD->SetInstructionsText(BuildOrder->GetInstructions());
 	}
 }
 
@@ -254,6 +268,7 @@ void AProjectMishkanPlayerController::ChangeToCamera(const FString& Name)
 {
 	ACameraActor* camera = GetCamera(Name);
 	if (camera != NULL) {
+		CurrentCamera = camera;
 		SetViewTarget(camera);
 	}
 }

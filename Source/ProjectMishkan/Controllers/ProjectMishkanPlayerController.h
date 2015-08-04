@@ -53,6 +53,7 @@ private:
 	static const FString MainCameraName;
 	static const FString PlacementCameraName;
 	static const FString FirstPersonCameraName;
+	ACameraActor* CurrentCamera;
 	ACameraActor* MainCamera;
 	ACameraActor* PlacementCamera;
 	ACameraActor* FirstPersonCamera;

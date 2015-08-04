@@ -1,4 +1,5 @@
 #include "ProjectMishkan.h"
+#include "StringConstants.h"
 #include "BuildOrder.h"
 
 const std::vector<EBuildStep> UBuildOrder::BuildSteps = {
@@ -22,7 +23,7 @@ UBuildOrder::UBuildOrder()
 }
 
 // Check to see if the request to build @param step is valid
-bool UBuildOrder::CanBuild(IPlaceable* placeable)
+bool UBuildOrder::CanBuild(IPlaceable* placeable) const
 {
 	// Check to see if still building
 	if (CurrentStep >= 0 && CurrentStep < BuildSteps.size()) {
@@ -41,8 +42,13 @@ void UBuildOrder::Build()
 	}
 }
 
+FText UBuildOrder::GetInstructions() const
+{
+	return StringConstants::GetInstructions(Current());
+}
+
 // Returns the current build step
-FORCEINLINE EBuildStep UBuildOrder::Current()
+FORCEINLINE EBuildStep UBuildOrder::Current() const
 {
 	if (CurrentStep >= 0 && CurrentStep < BuildSteps.size()) {
 		return BuildSteps[CurrentStep];

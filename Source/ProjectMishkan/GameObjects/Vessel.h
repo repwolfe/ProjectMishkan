@@ -32,8 +32,10 @@ public:
 	// Called when the actor is clicked by a finger on a touch device
 	virtual void NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex) override;
 
+	#if WITH_EDITOR
 	// Called when property is changed in the Unreal Editor
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	#endif
 
 	virtual EBuildStep GetBuildStep() override;
 	virtual FVector GetLocation() override;

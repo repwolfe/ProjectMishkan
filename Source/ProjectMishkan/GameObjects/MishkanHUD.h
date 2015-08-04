@@ -4,6 +4,7 @@
 #include "Engine/Canvas.h"
 #include "../Model/BuildModes.h"
 #include "../Model/HUDButtons.h"
+#include "InstructionsBox.h"
 #include "MishkanHUD.generated.h"
 
 DECLARE_DELEGATE(FHUDButtonDelegate)
@@ -39,16 +40,26 @@ public:
 	virtual void DrawHUD() override;
 	virtual void NotifyHitBoxClick(FName BoxName) override;
 
+	void SetInstructionsText(FText text);
 	void SetBuildMode(EBuildMode mode);
 	void SetPlacementHandlers(FHUDButtonDelegate* delegates);
+	void OnNewOwningPlayerController(APlayerController* controller);
 	
 private:
 	void UpdateScale();
+	void UpdateSelectionHUD();
+	void DrawSelectionHUD();
 	void UpdatePlacementHUD();
 	void DrawPlacementHUD();
 
-	// Graphic elements
+	// Graphic elements / data
 	float ScaleUI;
+	FText InstructionsText;
+
+	UFont* SmallFont;
+	FColor HUDDark;
 	FHUDButton PlacementButtons[EPlacementButton::Size];
+	TSubclassOf<UInstructionsBox> InstructionsBoxBP;
+	UInstructionsBox* InstructionsBox;
 	EBuildMode CurrentBuildMode;
 };
