@@ -58,6 +58,8 @@ private:
 	ACameraActor* PlacementCamera;
 	ACameraActor* FirstPersonCamera;
 
+	const uint16 PlacementCameraOffset = 250;	// Used to calculate how high to place the placeable in Placement Mode
+
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;
 	bool MousePressed;

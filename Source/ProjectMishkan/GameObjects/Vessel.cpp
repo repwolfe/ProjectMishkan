@@ -108,7 +108,7 @@ FORCEINLINE EBuildStep AVessel::GetBuildStep()
 	return BuildStep;
 }
 
-FVector AVessel::GetLocation()
+FVector AVessel::GetLocation() const
 {
 	return GetActorLocation();
 }
@@ -116,6 +116,15 @@ FVector AVessel::GetLocation()
 void AVessel::SetLocation(FVector loc)
 {
 	SetActorLocation(loc);
+}
+
+/**
+ * The 3D Mesh has a BoundingBox indicating how far the edge is from the center in 3D
+ * @returns 3D Vector of the size of the Mesh, which is twice the bounding box
+ */
+FVector AVessel::GetSize() const
+{
+	return ThreeDeeModel->Bounds.BoxExtent * 2;
 }
 
 // Saves the current state of the Vessel to be restored at a later time
@@ -163,10 +172,13 @@ void AVessel::CreateTriggerBox()
 	}
 
 	// Adjust the size of the Trigger Box
-	auto BoundingBox = ThreeDeeModel->Bounds.BoxExtent;
+	FVector BoundingBox = ThreeDeeModel->Bounds.BoxExtent;		// copy
 	BoundingBox *= BoundingBoxBufferScale;
-	TriggerBox->SetRelativeLocation(FVector(0, 0, CameraOffset));
-	BoundingBox.Z = 100;	// TODO: Set to Constant
+	float larger = FMath::Max(BoundingBox.X, BoundingBox.Y);		// Make it a cube
+	const float MAX_PLACEMENT_CAMERA_HEIGHT = 2000.f;		// TODO: Place this somewhere more appropriate
+	BoundingBox.Set(larger, larger, MAX_PLACEMENT_CAMERA_HEIGHT);
+
+	TriggerBox->SetRelativeLocation(FVector(0, 0, 0));
 	TriggerBox->SetBoxExtent(BoundingBox);
 }
 

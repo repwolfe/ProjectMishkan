@@ -119,11 +119,10 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 	FVector placeableLoc = Placeable->GetLocation();
 	cameraLoc.X = placeableLoc.X;
 	cameraLoc.Y = placeableLoc.Y;
-	cameraLoc.Z = IPlaceable::CameraOffset * 2;		// Be twice as high as the Placeable is
 	camera->SetActorLocation(cameraLoc);
 
 	// Bring the Placeable closer to the screen (relative to the Placement camera)
-	placeableLoc.Z = IPlaceable::CameraOffset;
+	placeableLoc.Z = cameraLoc.Z - Placeable->GetSize().Z - PlacementCameraOffset;
 	Placeable->SetLocation(placeableLoc);
 
 	SetBuildMode(EBuildMode::Placement);

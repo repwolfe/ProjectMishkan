@@ -38,7 +38,8 @@ public:
 	#endif
 
 	virtual EBuildStep GetBuildStep() override;
-	virtual FVector GetLocation() override;
+	virtual FVector GetLocation() const override;
+	virtual FVector GetSize() const override;
 	virtual const std::list<IPlaceable*>& GetWhatsOverlapped() const override;
 	virtual void SetLocation(FVector loc) override;
 	virtual void SaveState() override;
