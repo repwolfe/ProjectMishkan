@@ -16,7 +16,8 @@ class PROJECTMISHKAN_API IPlaceable {
 
 public:
 	virtual EBuildStep GetBuildStep() = 0;
-	virtual FVector GetLocation() = 0;
+	virtual FVector GetLocation() const = 0;
+	virtual FVector GetSize() const = 0;
 	virtual const std::list<IPlaceable*>& GetWhatsOverlapped() const = 0;
 	virtual void SetLocation(FVector loc) = 0;
 	virtual void SaveState() = 0;
@@ -25,6 +26,4 @@ public:
 	virtual void RotateLeft() = 0;
 	virtual bool CanPlaceAt(IPlaceable* finalPlacement) = 0;
 	virtual void PlaceAt(IPlaceable* finalPlacement) = 0;
-
-	static const uint16 CameraOffset;	// How far up to move the Placeable when in Placement mode
 };

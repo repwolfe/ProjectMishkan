@@ -1,6 +1,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
 #include "ProjectMishkan.h"
+#include "../GameObjects/MishkanHUD.h"
 #include "ProjectMishkanPlayerController.h"
 #include "EngineUtils.h"
 
@@ -19,25 +20,54 @@ AProjectMishkanPlayerController::AProjectMishkanPlayerController(const FObjectIn
 	BuildOrder = NewObject<UBuildOrder>(this, TEXT("BuildOrder"));
 }
 
+// Called when the HUD is changed
+void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< class AHUD > NewHUDClass)
+{
+	Super::ClientSetHUD_Implementation(NewHUDClass);
+
+	// If it's MishkanHUD
+	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
+	if (HUD) {
+		FHUDButtonDelegate handlers[EPlacementButton::Size];
+		handlers[EPlacementButton::RotateLeft].BindUObject(this, &AProjectMishkanPlayerController::RotateLeft);
+		handlers[EPlacementButton::RotateRight].BindUObject(this, &AProjectMishkanPlayerController::RotateRight);
+		handlers[EPlacementButton::Okay].BindUObject(this, &AProjectMishkanPlayerController::AttemptPlacement);
+		handlers[EPlacementButton::Cancel].BindUObject(this, &AProjectMishkanPlayerController::CancelPlacement);
+		HUD->SetPlacementHandlers(handlers);
+		HUD->OnNewOwningPlayerController(this);
+	}
+}
+
 // Called every Frame
 void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
-	// If in placement mode, check if mouse pressed and dragged, move camera/placeable
-	if (BuildMode == EBuildMode::Placement && MousePressed) {
-		const uint8 SCALE_VALUE = 20;
-		float deltaX = 0, deltaY = 0;
-		GetInputMouseDelta(deltaX, deltaY);		// TODO: Make work for touch screen
+	if (CurrentCamera == NULL) {
+		ChangeToMainCamera();		// At the start use the main camera
+		SetBuildMode(EBuildMode::Selection);
+	}
 
-		FVector loc = Placeable->GetLocation();
-		loc.X += deltaY * SCALE_VALUE;		// Mouse coordinates and World coordinates are transpose of each other
-		loc.Y += deltaX * SCALE_VALUE;
-		Placeable->SetLocation(loc);
+	// If in selection/placement mode, check if mouse pressed and dragged, move camera/placeable
+	if (MousePressed) {
+		const uint8 SCALE_VALUE = 20;	// TODO: Move this somewhere else, and pick a good value
+		float mouseDeltaX = 0, mouseDeltaY = 0;
+		GetInputMouseDelta(mouseDeltaX, mouseDeltaY);		// TODO: Make work for touch screen
 
-		ACameraActor* camera = GetPlacementCamera();
-		FVector cameraLoc = camera->GetActorLocation();
-		cameraLoc.X = loc.X;
-		cameraLoc.Y = loc.Y;
-		camera->SetActorLocation(cameraLoc);
+		// Mouse coordinates and World coordinates are transpose of each other
+		FVector2D delta(mouseDeltaY * SCALE_VALUE, mouseDeltaX * SCALE_VALUE);
+
+		// Move the camera as the player drags
+		if (BuildMode == EBuildMode::Selection || BuildMode == EBuildMode::Placement) {
+			FVector cameraLoc = CurrentCamera->GetActorLocation();
+			cameraLoc.X += delta.X;
+			cameraLoc.Y += delta.Y;
+			CurrentCamera->SetActorLocation(cameraLoc);
+		}
+		if (BuildMode == EBuildMode::Placement) {
+			FVector loc = Placeable->GetLocation();
+			loc.X += delta.X;
+			loc.Y += delta.Y;
+			Placeable->SetLocation(loc);
+		}
 	}
 
 	Super::PlayerTick(deltaTime);
@@ -50,7 +80,6 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 
 	check(InputComponent);
 	InputComponent->BindAction("SwitchToMainCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToMainCamera);
-	InputComponent->BindAction("SwitchToPlacementCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToPlacementCamera);
 	InputComponent->BindAction("SwitchToFirstPersonCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToFirstPersonCamera);
 	InputComponent->BindAction("RotateLeft", IE_Released, this, &AProjectMishkanPlayerController::RotateLeft);
 	InputComponent->BindAction("RotateRight", IE_Released, this, &AProjectMishkanPlayerController::RotateRight);
@@ -58,6 +87,18 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
 	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
+}
+
+void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
+{
+	BuildMode = mode;
+
+	// Inform the HUD of the change in Mode
+	AMishkanHUD* HUD = Cast<AMishkanHUD>(GetHUD());
+	if (HUD) {
+		HUD->SetBuildMode(mode);
+		HUD->SetInstructionsText(BuildOrder->GetInstructions());
+	}
 }
 
 // Start placing the selected Vessel
@@ -78,14 +119,13 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 	FVector placeableLoc = Placeable->GetLocation();
 	cameraLoc.X = placeableLoc.X;
 	cameraLoc.Y = placeableLoc.Y;
-	cameraLoc.Z = IPlaceable::CameraOffset * 2;		// Be twice as high as the Placeable is
 	camera->SetActorLocation(cameraLoc);
 
 	// Bring the Placeable closer to the screen (relative to the Placement camera)
-	placeableLoc.Z = IPlaceable::CameraOffset;
+	placeableLoc.Z = cameraLoc.Z - Placeable->GetSize().Z - PlacementCameraOffset;
 	Placeable->SetLocation(placeableLoc);
 
-	BuildMode = EBuildMode::Placement;
+	SetBuildMode(EBuildMode::Placement);
 }
 
 // Lazy loads Main Camera pointer
@@ -129,16 +169,13 @@ FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetCamera(const FStri
 // Event handlers
 void AProjectMishkanPlayerController::ChangeToMainCamera(float Value)
 {
+	SetBuildMode(EBuildMode::Selection);
 	ChangeToMainCamera();
-}
-
-void AProjectMishkanPlayerController::ChangeToPlacementCamera(float Value)
-{
-	ChangeToPlacementCamera();
 }
 
 void AProjectMishkanPlayerController::ChangeToFirstPersonCamera(float Value)
 {
+	SetBuildMode(EBuildMode::FirstPerson);
 	ChangeToFirstPersonCamera();
 }
 
@@ -171,7 +208,7 @@ void AProjectMishkanPlayerController::PlaceCurrent(IPlaceable* finalPlacement)
 	ChangeToMainCamera();
 	Placeable->PlaceAt(finalPlacement);
 	Placeable = NULL;
-	BuildMode = EBuildMode::Selection;
+	SetBuildMode(EBuildMode::Selection);
 }
 
 /**
@@ -205,7 +242,7 @@ void AProjectMishkanPlayerController::CancelPlacement()
 	if (BuildMode == EBuildMode::Placement) {
 		Placeable->ResetState();
 		Placeable = NULL;
-		BuildMode = EBuildMode::Selection;
+		SetBuildMode(EBuildMode::Selection);
 	}
 }
 
@@ -229,6 +266,7 @@ void AProjectMishkanPlayerController::ChangeToCamera(const FString& Name)
 {
 	ACameraActor* camera = GetCamera(Name);
 	if (camera != NULL) {
+		CurrentCamera = camera;
 		SetViewTarget(camera);
 	}
 }

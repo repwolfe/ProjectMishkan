@@ -16,12 +16,15 @@ class AProjectMishkanPlayerController : public APlayerController
 public:
 	AProjectMishkanPlayerController(const FObjectInitializer& ObjectInitializer);
 
+	virtual void ClientSetHUD_Implementation(TSubclassOf< class AHUD > NewHUDClass) override;
 	virtual void PlayerTick(float deltaTime) override;
 
 	void SelectPlaceable(IPlaceable* placeable);
 
 private:
 	virtual void SetupInputComponent() override;
+
+	void SetBuildMode(EBuildMode mode);
 
 	// Helper functions to lazy load camera pointers
 	ACameraActor* GetMainCamera();
@@ -31,7 +34,6 @@ private:
 
 	// Event Handlers
 	void ChangeToMainCamera(float Value);
-	void ChangeToPlacementCamera(float Value);
 	void ChangeToFirstPersonCamera(float Value);
 	void RotateLeft();
 	void RotateRight();
@@ -51,9 +53,12 @@ private:
 	static const FString MainCameraName;
 	static const FString PlacementCameraName;
 	static const FString FirstPersonCameraName;
+	ACameraActor* CurrentCamera;
 	ACameraActor* MainCamera;
 	ACameraActor* PlacementCamera;
 	ACameraActor* FirstPersonCamera;
+
+	const uint16 PlacementCameraOffset = 250;	// Used to calculate how high to place the placeable in Placement Mode
 
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;

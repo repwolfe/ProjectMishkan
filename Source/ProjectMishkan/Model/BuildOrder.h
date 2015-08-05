@@ -14,11 +14,12 @@ class PROJECTMISHKAN_API UBuildOrder : public UObject {
 
 public:
 	UBuildOrder();
-	bool CanBuild(IPlaceable* placeable);
+	bool CanBuild(IPlaceable* placeable) const;
 	void Build();
+	FText GetInstructions() const;
 
 private:
-	EBuildStep Current();
+	EBuildStep Current() const;
 
 	static const std::vector<EBuildStep> BuildSteps;
 	static const uint8 NumSteps;
