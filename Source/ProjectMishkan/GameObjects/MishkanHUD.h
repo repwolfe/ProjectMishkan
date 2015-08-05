@@ -47,6 +47,7 @@ public:
 	
 private:
 	void UpdateScale();
+	void UpdateInstructionsBoxVisibility();
 	void UpdateSelectionHUD();
 	void DrawSelectionHUD();
 	void UpdatePlacementHUD();

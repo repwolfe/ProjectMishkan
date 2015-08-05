@@ -43,7 +43,6 @@ void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
 	if (CurrentCamera == NULL) {
 		ChangeToMainCamera();		// At the start use the main camera
-		//bool worked = FInternationalization::Get().SetCurrentCulture(TEXT("he"));
 		SetBuildMode(EBuildMode::Selection);
 	}
 

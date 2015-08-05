@@ -73,12 +73,19 @@ void AMishkanHUD::OnNewOwningPlayerController(APlayerController* controller)
 {
 	InstructionsBox = CreateWidget<UInstructionsBox>(controller, InstructionsBoxBP);
 	InstructionsBox->AddToViewport();
+	UpdateInstructionsBoxVisibility();
 }
 
 // Ensures everything is an appropriate size regardless of the screen size
 FORCEINLINE void AMishkanHUD::UpdateScale()
 {
 	ScaleUI = Canvas->ClipY / 1080.0f;		// Assuming assets are made for a 1080px tall screen
+}
+
+FORCEINLINE void AMishkanHUD::UpdateInstructionsBoxVisibility()
+{
+	ESlateVisibility visibility = (CurrentBuildMode == EBuildMode::Selection) ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	InstructionsBox->SetVisibility(visibility);
 }
 
 // Makes sure all the things drawn in Selection mode are at their proper position
@@ -148,6 +155,5 @@ void AMishkanHUD::SetInstructionsText(FText text)
 void AMishkanHUD::SetBuildMode(EBuildMode mode)
 {
 	CurrentBuildMode = mode;
-	ESlateVisibility visibility = (mode == EBuildMode::Selection) ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	InstructionsBox->SetVisibility(visibility);
+	UpdateInstructionsBoxVisibility();
 }

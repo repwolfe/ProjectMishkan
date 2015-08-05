@@ -44,7 +44,7 @@ void UBuildOrder::Build()
 
 FText UBuildOrder::GetInstructions() const
 {
-	return StringConstants::GetInstructions(Current());
+	return StringConstants::Instance()->GetInstructions(Current());
 }
 
 // Returns the current build step
