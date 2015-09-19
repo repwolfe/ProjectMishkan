@@ -87,6 +87,7 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
 	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
+	InputComponent->BindAction("ToggleHidePlaceables", IE_Released, this, &AProjectMishkanPlayerController::ToggleHidePlaceables);
 }
 
 void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
@@ -243,6 +244,19 @@ void AProjectMishkanPlayerController::CancelPlacement()
 		Placeable->ResetState();
 		Placeable = NULL;
 		SetBuildMode(EBuildMode::Selection);
+	}
+}
+
+//
+void AProjectMishkanPlayerController::ToggleHidePlaceables()
+{
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
+		IPlaceable* placeable = Cast<IPlaceable>(*ActorItr);
+		if (placeable != NULL) {
+			if (placeable->GetBuildStage() == EVesselBuildStage::Hidden) {
+				placeable->ToggleHidden();
+			}
+		}
 	}
 }
 

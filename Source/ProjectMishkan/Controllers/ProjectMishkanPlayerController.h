@@ -42,6 +42,7 @@ private:
 	void PlaceCurrent(IPlaceable* finalPlacement);
 	void AttemptPlacement();
 	void CancelPlacement();
+	void ToggleHidePlaceables();
 
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();

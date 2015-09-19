@@ -2,6 +2,7 @@
 
 #include <list>
 #include "../Model/BuildSteps.h"
+#include "../Model/VesselBuildStages.h"
 #include "IPlaceable.generated.h"
 
 // Boilerplate code to allow for an Unreal Interface
@@ -16,6 +17,7 @@ class PROJECTMISHKAN_API IPlaceable {
 
 public:
 	virtual EBuildStep GetBuildStep() = 0;
+	virtual EVesselBuildStage GetBuildStage() = 0;
 	virtual FVector GetLocation() const = 0;
 	virtual FVector GetSize() const = 0;
 	virtual const std::list<IPlaceable*>& GetWhatsOverlapped() const = 0;
@@ -24,6 +26,7 @@ public:
 	virtual void ResetState() = 0;
 	virtual void RotateRight() = 0;
 	virtual void RotateLeft() = 0;
+	virtual void ToggleHidden() = 0;
 	virtual bool CanPlaceAt(IPlaceable* finalPlacement) = 0;
 	virtual void PlaceAt(IPlaceable* finalPlacement) = 0;
 };
