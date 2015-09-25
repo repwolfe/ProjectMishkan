@@ -14,7 +14,7 @@ AMishkanHUD::AMishkanHUD(const FObjectInitializer& ObjectInitializer)
 	PlacementButtons[EPlacementButton::Okay] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 650, 180, 180), TEXT("Okay"));
 	PlacementButtons[EPlacementButton::Cancel] = FHUDButton(UCanvas::MakeIcon(ButtonsTexture, 50, 880, 180, 180), TEXT("Cancel"));
 
-	static ConstructorHelpers::FObjectFinder<UFont> SmallFontOb(TEXT("/Game/Fonts/RobotoSmall"));
+	static ConstructorHelpers::FObjectFinder<UFont> SmallFontOb(TEXT("/Game/Fonts/arial"));
 	SmallFont = SmallFontOb.Object;
 
 	HUDDark = FColor(20, 20, 20, 255);
