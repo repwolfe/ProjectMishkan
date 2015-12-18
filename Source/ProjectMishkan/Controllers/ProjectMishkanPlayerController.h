@@ -7,7 +7,6 @@
 #include "../Model/BuildOrder.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
-/** PlayerController class used to enable cursor */
 UCLASS()
 class AProjectMishkanPlayerController : public APlayerController
 {
