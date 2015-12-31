@@ -5,6 +5,7 @@
 #include "../Interfaces/IPlaceable.h"
 #include "../Model/BuildModes.h"
 #include "../Model/BuildOrder.h"
+#include "../GameObjects/MishkanPawn.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
 UCLASS()
@@ -25,15 +26,16 @@ private:
 
 	void SetBuildMode(EBuildMode mode);
 
+	template<typename T>
+	T* GetActorInWorld(const FString& Name);
+
 	// Helper functions to lazy load camera pointers
 	ACameraActor* GetMainCamera();
 	ACameraActor* GetPlacementCamera();
-	ACameraActor* GetFirstPersonCamera();
-	ACameraActor* GetCamera(const FString& Name);
 
 	// Event Handlers
-	void ChangeToMainCamera(float Value);
-	void ChangeToFirstPersonCamera(float Value);
+	void SwitchToThirdPerson();
+	void SwitchToFirstPerson();
 	void RotateLeft();
 	void RotateRight();
 	void OnPress();
@@ -42,17 +44,21 @@ private:
 	void AttemptPlacement();
 	void CancelPlacement();
 	void ToggleHidePlaceables();
+	void MoveForward();
+	void MoveBack();
+	void MoveLeft();
+	void MoveRight();
 
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();
 	void ChangeToPlacementCamera();
-	void ChangeToFirstPersonCamera();
 	void ChangeToCamera(const FString& Name);
+
+	static const FString PlayerPawnName;
 
 	// Camera variables/constants
 	static const FString MainCameraName;
 	static const FString PlacementCameraName;
-	static const FString FirstPersonCameraName;
 	ACameraActor* CurrentCamera;
 	ACameraActor* MainCamera;
 	ACameraActor* PlacementCamera;
@@ -65,4 +71,6 @@ private:
 	bool MousePressed;
 
 	UBuildOrder* BuildOrder;
+
+	AMishkanPawn* PlayerPawn;
 };
