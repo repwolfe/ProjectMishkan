@@ -37,7 +37,7 @@ void AMishkanHUD::DrawHUD()
 			UpdatePlacementHUD();
 			DrawPlacementHUD();
 			break;
-		case EBuildMode::FirstPerson:
+		case EBuildMode::Character:
 			break;
 	}
 }

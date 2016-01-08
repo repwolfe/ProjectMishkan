@@ -17,12 +17,27 @@ AMishkanPawn::AMishkanPawn()
 	Sight->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 }
 
-void AMishkanPawn::MovePawn()
+void AMishkanPawn::MoveForward()
+{
+	//AddActorLocalOffset(GetActorForwardVector() * 5.0f);
+}
+
+void AMishkanPawn::MoveBack()
+{
+	//AddActorLocalOffset(GetActorForwardVector() * -5.0f);
+}
+
+void AMishkanPawn::MoveLeft()
 {
 
 }
 
-void AMishkanPawn::UpdateSight()
+void AMishkanPawn::MoveRight()
 {
+}
 
+void AMishkanPawn::UpdateSight(float deltaYaw, float deltaPitch)
+{
+	//Appearance->AddRelativeRotation(FRotator(0, deltaYaw, 0));
+	Sight->AddRelativeRotation(FRotator(deltaPitch, deltaYaw, 0));
 }

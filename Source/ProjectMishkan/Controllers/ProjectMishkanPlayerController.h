@@ -34,20 +34,26 @@ private:
 	ACameraActor* GetPlacementCamera();
 
 	// Event Handlers
-	void SwitchToThirdPerson();
-	void SwitchToFirstPerson();
+	void SwitchToCharacterMode();
+	void SwitchToSelectionMode();
 	void RotateLeft();
 	void RotateRight();
 	void OnPress();
 	void OnRelease();
 	void PlaceCurrent(IPlaceable* finalPlacement);
 	void AttemptPlacement();
+	void OnCancelButtonClicked();
 	void CancelPlacement();
 	void ToggleHidePlaceables();
-	void MoveForward();
-	void MoveBack();
-	void MoveLeft();
-	void MoveRight();
+
+	void PressedForward();
+	void ReleasedForward();
+	void PressedBack();
+	void ReleasedBack();
+	void PressedLeft();
+	void ReleasedLeft();
+	void PressedRight();
+	void ReleasedRight();
 
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();
@@ -69,6 +75,8 @@ private:
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;
 	bool MousePressed;
+
+	bool PressingForward, PressingBack, PressingLeft, PressingRight;
 
 	UBuildOrder* BuildOrder;
 

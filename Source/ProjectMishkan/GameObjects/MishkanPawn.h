@@ -14,8 +14,11 @@ class PROJECTMISHKAN_API AMishkanPawn : public APawn
 public:
 	AMishkanPawn();
 
-	void MovePawn();
-	void UpdateSight();
+	void MoveForward();
+	void MoveBack();
+	void MoveLeft();
+	void MoveRight();
+	void UpdateSight(float deltaYaw, float deltaPitch);
 
 private:
 	UCameraComponent* Sight;				// The Character's Sight
