@@ -21,6 +21,8 @@ public:
 	void UpdateSight(float deltaYaw, float deltaPitch);
 
 private:
+	static const float MISHKAN_MAX_PITCH;
+	static const float MOVEMENT_SPEED;
 	UCameraComponent* Sight;				// The Character's Sight
 	UStaticMeshComponent* Appearance;	// A Rectangular Prism representing the Pawn's appearance
 };

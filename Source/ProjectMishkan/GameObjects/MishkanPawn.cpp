@@ -1,6 +1,9 @@
 #include "ProjectMishkan.h"
 #include "MishkanPawn.h"
 
+const float AMishkanPawn::MISHKAN_MAX_PITCH = 75.f;
+const float AMishkanPawn::MOVEMENT_SPEED = 20.f;
+
 AMishkanPawn::AMishkanPawn()
 {
 	// A Mishkan Pawn is represented by a rectangular prism and a camera, approximately the size of a person (relatively)
@@ -13,31 +16,41 @@ AMishkanPawn::AMishkanPawn()
 
 	Sight = CreateDefaultSubobject<UCameraComponent>(TEXT("SightCamera"));
 	Sight->AttachTo(RootComponent);
-	Sight->SetRelativeLocation(FVector(100.0f, 0.0f, 25.0f));
+	Sight->SetRelativeLocation(FVector(0.0f, 0.0f, 25.0f));
 	Sight->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 }
 
 void AMishkanPawn::MoveForward()
 {
-	//AddActorLocalOffset(GetActorForwardVector() * 5.0f);
+	FVector vec = Sight->GetForwardVector();
+	vec.Z = 0.0f;
+	AddActorLocalOffset(vec * MOVEMENT_SPEED);
 }
 
 void AMishkanPawn::MoveBack()
 {
-	//AddActorLocalOffset(GetActorForwardVector() * -5.0f);
+	FVector vec = Sight->GetForwardVector();
+	vec.Z = 0.0f;
+	AddActorLocalOffset(vec * -MOVEMENT_SPEED);
 }
 
 void AMishkanPawn::MoveLeft()
 {
-
+	FVector vec = Sight->GetRightVector();
+	vec.Z = 0.0f;
+	AddActorLocalOffset(vec * -MOVEMENT_SPEED);
 }
 
 void AMishkanPawn::MoveRight()
 {
+	FVector vec = Sight->GetRightVector();
+	vec.Z = 0.0f;
+	AddActorLocalOffset(vec * MOVEMENT_SPEED);
 }
 
 void AMishkanPawn::UpdateSight(float deltaYaw, float deltaPitch)
 {
-	//Appearance->AddRelativeRotation(FRotator(0, deltaYaw, 0));
+	FRotator current = Sight->GetComponentRotation();
+	deltaPitch = (FMath::Abs((current.Pitch + deltaPitch)) < MISHKAN_MAX_PITCH) ? deltaPitch : 0;	// Bound the pitch
 	Sight->AddRelativeRotation(FRotator(deltaPitch, deltaYaw, 0));
 }
