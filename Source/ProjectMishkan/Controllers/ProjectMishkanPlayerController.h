@@ -5,9 +5,9 @@
 #include "../Interfaces/IPlaceable.h"
 #include "../Model/BuildModes.h"
 #include "../Model/BuildOrder.h"
+#include "../GameObjects/MishkanPawn.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
-/** PlayerController class used to enable cursor */
 UCLASS()
 class AProjectMishkanPlayerController : public APlayerController
 {
@@ -26,33 +26,45 @@ private:
 
 	void SetBuildMode(EBuildMode mode);
 
+	template<typename T>
+	T* GetActorInWorld(const FString& Name);
+
 	// Helper functions to lazy load camera pointers
 	ACameraActor* GetMainCamera();
 	ACameraActor* GetPlacementCamera();
-	ACameraActor* GetFirstPersonCamera();
-	ACameraActor* GetCamera(const FString& Name);
 
 	// Event Handlers
-	void ChangeToMainCamera(float Value);
-	void ChangeToFirstPersonCamera(float Value);
+	void SwitchToCharacterMode();
+	void SwitchToSelectionMode();
 	void RotateLeft();
 	void RotateRight();
 	void OnPress();
 	void OnRelease();
 	void PlaceCurrent(IPlaceable* finalPlacement);
 	void AttemptPlacement();
+	void OnCancelButtonClicked();
 	void CancelPlacement();
+	void ToggleHidePlaceables();
+
+	void PressedForward();
+	void ReleasedForward();
+	void PressedBack();
+	void ReleasedBack();
+	void PressedLeft();
+	void ReleasedLeft();
+	void PressedRight();
+	void ReleasedRight();
 
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();
 	void ChangeToPlacementCamera();
-	void ChangeToFirstPersonCamera();
 	void ChangeToCamera(const FString& Name);
+
+	static const FString PlayerPawnName;
 
 	// Camera variables/constants
 	static const FString MainCameraName;
 	static const FString PlacementCameraName;
-	static const FString FirstPersonCameraName;
 	ACameraActor* CurrentCamera;
 	ACameraActor* MainCamera;
 	ACameraActor* PlacementCamera;
@@ -64,5 +76,9 @@ private:
 	IPlaceable* Placeable;
 	bool MousePressed;
 
+	bool PressingForward, PressingBack, PressingLeft, PressingRight;
+
 	UBuildOrder* BuildOrder;
+
+	AMishkanPawn* PlayerPawn;
 };

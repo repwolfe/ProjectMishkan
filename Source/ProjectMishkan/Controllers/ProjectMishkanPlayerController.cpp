@@ -5,9 +5,9 @@
 #include "ProjectMishkanPlayerController.h"
 #include "EngineUtils.h"
 
+const FString AProjectMishkanPlayerController::PlayerPawnName = TEXT("PlayerPawn");
 const FString AProjectMishkanPlayerController::MainCameraName = TEXT("MainCamera");
 const FString AProjectMishkanPlayerController::PlacementCameraName = TEXT("PlacementCamera");
-const FString AProjectMishkanPlayerController::FirstPersonCameraName = TEXT("FirstPersonCamera");
 
 AProjectMishkanPlayerController::AProjectMishkanPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), BuildMode(EBuildMode::Selection)
@@ -32,7 +32,7 @@ void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< c
 		handlers[EPlacementButton::RotateLeft].BindUObject(this, &AProjectMishkanPlayerController::RotateLeft);
 		handlers[EPlacementButton::RotateRight].BindUObject(this, &AProjectMishkanPlayerController::RotateRight);
 		handlers[EPlacementButton::Okay].BindUObject(this, &AProjectMishkanPlayerController::AttemptPlacement);
-		handlers[EPlacementButton::Cancel].BindUObject(this, &AProjectMishkanPlayerController::CancelPlacement);
+		handlers[EPlacementButton::Cancel].BindUObject(this, &AProjectMishkanPlayerController::OnCancelButtonClicked);
 		HUD->SetPlacementHandlers(handlers);
 		HUD->OnNewOwningPlayerController(this);
 	}
@@ -41,21 +41,37 @@ void AProjectMishkanPlayerController::ClientSetHUD_Implementation(TSubclassOf< c
 // Called every Frame
 void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 {
+	// Initialize pointers to world objects
 	if (CurrentCamera == NULL) {
 		ChangeToMainCamera();		// At the start use the main camera
 		SetBuildMode(EBuildMode::Selection);
 	}
+	if (PlayerPawn == NULL) {
+		PlayerPawn = GetActorInWorld<AMishkanPawn>(PlayerPawnName);
+	}
 
+	// Get the mouse delta
+	const uint8 SCALE_VALUE = 20;	// TODO: Move this somewhere else, and pick a good value
+	float mouseDeltaX = 0, mouseDeltaY = 0;
+	GetInputMouseDelta(mouseDeltaX, mouseDeltaY);		// TODO: Make work for touch screen
+	mouseDeltaX *= SCALE_VALUE; mouseDeltaY *= SCALE_VALUE;
+
+	if (BuildMode == EBuildMode::Character) {
+		PlayerPawn->UpdateSight(mouseDeltaX, mouseDeltaY);
+
+		// Check if holding movement keys
+		if (PressingForward) { PlayerPawn->MoveForward(); }
+		if (PressingBack) { PlayerPawn->MoveBack(); }
+		if (PressingLeft) { PlayerPawn->MoveLeft(); }
+		if (PressingRight) { PlayerPawn->MoveRight(); }
+	}
 	// If in selection/placement mode, check if mouse pressed and dragged, move camera/placeable
-	if (MousePressed) {
-		const uint8 SCALE_VALUE = 20;	// TODO: Move this somewhere else, and pick a good value
-		float mouseDeltaX = 0, mouseDeltaY = 0;
-		GetInputMouseDelta(mouseDeltaX, mouseDeltaY);		// TODO: Make work for touch screen
+	else if (MousePressed) {
+		// Move the camera as the player drags
 
 		// Mouse coordinates and World coordinates are transpose of each other
-		FVector2D delta(mouseDeltaY * SCALE_VALUE, mouseDeltaX * SCALE_VALUE);
+		FVector2D delta(mouseDeltaY, mouseDeltaX);
 
-		// Move the camera as the player drags
 		if (BuildMode == EBuildMode::Selection || BuildMode == EBuildMode::Placement) {
 			FVector cameraLoc = CurrentCamera->GetActorLocation();
 			cameraLoc.X += delta.X;
@@ -69,7 +85,6 @@ void AProjectMishkanPlayerController::PlayerTick(float deltaTime)
 			Placeable->SetLocation(loc);
 		}
 	}
-
 	Super::PlayerTick(deltaTime);
 }
 
@@ -79,14 +94,24 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	check(InputComponent);
-	InputComponent->BindAction("SwitchToMainCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToMainCamera);
-	InputComponent->BindAction("SwitchToFirstPersonCamera", IE_Released, this, &AProjectMishkanPlayerController::ChangeToFirstPersonCamera);
+	InputComponent->BindAction("SwitchToCharacterMode", IE_Released, this, &AProjectMishkanPlayerController::SwitchToCharacterMode);
+	InputComponent->BindAction("SwitchToSelectionMode", IE_Released, this, &AProjectMishkanPlayerController::SwitchToSelectionMode);
 	InputComponent->BindAction("RotateLeft", IE_Released, this, &AProjectMishkanPlayerController::RotateLeft);
 	InputComponent->BindAction("RotateRight", IE_Released, this, &AProjectMishkanPlayerController::RotateRight);
 	InputComponent->BindAction("OnPress", IE_Pressed, this, &AProjectMishkanPlayerController::OnPress);
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
 	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
+	InputComponent->BindAction("ToggleHidePlaceables", IE_Released, this, &AProjectMishkanPlayerController::ToggleHidePlaceables);
+
+	InputComponent->BindAction("MoveForward", IE_Pressed, this, &AProjectMishkanPlayerController::PressedForward);
+	InputComponent->BindAction("MoveBack", IE_Pressed, this, &AProjectMishkanPlayerController::PressedBack);
+	InputComponent->BindAction("MoveLeft", IE_Pressed, this, &AProjectMishkanPlayerController::PressedLeft);
+	InputComponent->BindAction("MoveRight", IE_Pressed, this, &AProjectMishkanPlayerController::PressedRight);
+	InputComponent->BindAction("MoveForward", IE_Released, this, &AProjectMishkanPlayerController::ReleasedForward);
+	InputComponent->BindAction("MoveBack", IE_Released, this, &AProjectMishkanPlayerController::ReleasedBack);
+	InputComponent->BindAction("MoveLeft", IE_Released, this, &AProjectMishkanPlayerController::ReleasedLeft);
+	InputComponent->BindAction("MoveRight", IE_Released, this, &AProjectMishkanPlayerController::ReleasedRight);
 }
 
 void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
@@ -104,8 +129,8 @@ void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
 // Start placing the selected Vessel
 void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 {
-	if (BuildMode == EBuildMode::Placement) {
-		// Already in placement mode, ignore selections
+	if (BuildMode != EBuildMode::Selection) {
+		// Must be in Selection mode to select Vesels
 		return;
 	}
 
@@ -132,7 +157,7 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetMainCamera()
 {
 	if (MainCamera == NULL) {
-		return GetCamera(MainCameraName);
+		return GetActorInWorld<ACameraActor>(MainCameraName);
 	}
 	return MainCamera;
 }
@@ -141,24 +166,16 @@ FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetMainCamera()
 FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetPlacementCamera()
 {
 	if (PlacementCamera == NULL) {
-		return GetCamera(PlacementCameraName);
+		return GetActorInWorld<ACameraActor>(PlacementCameraName);
 	}
 	return PlacementCamera;
 }
 
-// Lazy loads Main Camera pointer
-FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetFirstPersonCamera()
+// Looks for the AActor pointer with the given name. Returns NULL if not found
+template<typename T>
+FORCEINLINE T* AProjectMishkanPlayerController::GetActorInWorld(const FString& Name)
 {
-	if (FirstPersonCamera == NULL) {
-		return GetCamera(FirstPersonCameraName);
-	}
-	return FirstPersonCamera;
-}
-
-// Looks for the CameraActor pointer with the given name. Returns NULL if not found
-FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetCamera(const FString& Name)
-{
-	for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
+	for (TActorIterator<T> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
 		if (ActorItr->GetName() == Name) {
 			return *ActorItr;
 		}
@@ -167,16 +184,19 @@ FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetCamera(const FStri
 }
 
 // Event handlers
-void AProjectMishkanPlayerController::ChangeToMainCamera(float Value)
+void AProjectMishkanPlayerController::SwitchToCharacterMode()
+{
+	CancelPlacement();		// In case a piece is currently selected
+	SetBuildMode(EBuildMode::Character);
+	SetViewTarget(PlayerPawn);
+	bShowMouseCursor = false;
+}
+
+void AProjectMishkanPlayerController::SwitchToSelectionMode()
 {
 	SetBuildMode(EBuildMode::Selection);
 	ChangeToMainCamera();
-}
-
-void AProjectMishkanPlayerController::ChangeToFirstPersonCamera(float Value)
-{
-	SetBuildMode(EBuildMode::FirstPerson);
-	ChangeToFirstPersonCamera();
+	bShowMouseCursor = true;
 }
 
 void AProjectMishkanPlayerController::RotateLeft()
@@ -236,14 +256,72 @@ void AProjectMishkanPlayerController::AttemptPlacement()
 	}
 }
 
-void AProjectMishkanPlayerController::CancelPlacement()
+void AProjectMishkanPlayerController::OnCancelButtonClicked()
 {
 	ChangeToMainCamera();
+	CancelPlacement();
+}
+
+void AProjectMishkanPlayerController::CancelPlacement()
+{
 	if (BuildMode == EBuildMode::Placement) {
 		Placeable->ResetState();
 		Placeable = NULL;
 		SetBuildMode(EBuildMode::Selection);
 	}
+}
+
+// Testing function to show/hide the final placeable positions
+void AProjectMishkanPlayerController::ToggleHidePlaceables()
+{
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
+		IPlaceable* placeable = Cast<IPlaceable>(*ActorItr);
+		if (placeable != NULL) {
+			if (placeable->GetBuildStage() == EVesselBuildStage::Hidden) {
+				placeable->ToggleHidden();
+			}
+		}
+	}
+}
+
+void AProjectMishkanPlayerController::PressedForward()
+{
+	PressingForward = true;
+}
+
+void AProjectMishkanPlayerController::ReleasedForward()
+{
+	PressingForward = false;
+}
+
+void AProjectMishkanPlayerController::PressedBack()
+{
+	PressingBack = true;
+}
+
+void AProjectMishkanPlayerController::ReleasedBack()
+{
+	PressingBack = false;
+}
+
+void AProjectMishkanPlayerController::PressedLeft()
+{
+	PressingLeft = true;
+}
+
+void AProjectMishkanPlayerController::ReleasedLeft()
+{
+	PressingLeft = false;
+}
+
+void AProjectMishkanPlayerController::PressedRight()
+{
+	PressingRight = true;
+}
+
+void AProjectMishkanPlayerController::ReleasedRight()
+{
+	PressingRight = false;
 }
 
 // Helper functions to switch the current camera
@@ -257,14 +335,9 @@ void AProjectMishkanPlayerController::ChangeToPlacementCamera()
 	ChangeToCamera(PlacementCameraName);
 }
 
-void AProjectMishkanPlayerController::ChangeToFirstPersonCamera()
-{
-	ChangeToCamera(FirstPersonCameraName);
-}
-
 void AProjectMishkanPlayerController::ChangeToCamera(const FString& Name)
 {
-	ACameraActor* camera = GetCamera(Name);
+	ACameraActor* camera = GetActorInWorld<ACameraActor>(Name);
 	if (camera != NULL) {
 		CurrentCamera = camera;
 		SetViewTarget(camera);
