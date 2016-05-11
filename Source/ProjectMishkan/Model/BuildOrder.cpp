@@ -5,7 +5,7 @@
 const std::vector<EBuildStep> UBuildOrder::BuildSteps = {
 	EBuildStep::NorthKerashim,
 	EBuildStep::Shulchan,
-	//EBuildStep::Menorah,
+	EBuildStep::Menorah,
 	EBuildStep::MizbeachHazahav
 };
 const uint8 UBuildOrder::NumSteps = BuildSteps.size();
@@ -13,7 +13,7 @@ const uint8 UBuildOrder::NumSteps = BuildSteps.size();
 const std::map<EBuildStep, uint8> UBuildOrder::VesselsPerStep = {
 	{EBuildStep::NorthKerashim, 4},
 	{EBuildStep::Shulchan, 1},
-	//{EBuildStep::Menorah, 1},
+	{EBuildStep::Menorah, 1},
 	{EBuildStep::MizbeachHazahav, 1}
 };
 
@@ -44,7 +44,7 @@ void UBuildOrder::Build()
 
 FText UBuildOrder::GetInstructions() const
 {
-	return StringConstants::Instance()->GetInstructions(Current());
+	return StringConstants::GetInstructions(Current());
 }
 
 // Returns the current build step

@@ -3,22 +3,20 @@
 
 #define LOCTEXT_NAMESPACE "Mishkan"
 
-StringConstants* StringConstants::InstancePointer;
+bool StringConstants::initialized = false;
+std::map<EBuildStep, FText> StringConstants::EasyStepInstructions;
+std::map<EBuildStep, FText> StringConstants::HardStepInstructions;
 
-StringConstants::StringConstants()
-{
-	SetupEasyStepInstructions();
-	SetupHardStepInstructions();
-}
-
+StringConstants::StringConstants() {}
 StringConstants::StringConstants(StringConstants& Other) {}
 
-StringConstants* StringConstants::Instance()
+void StringConstants::Initialize()
 {
-	if (InstancePointer == NULL) {
-		InstancePointer = new StringConstants();
+	if (initialized == false) {
+		SetupEasyStepInstructions();
+		SetupHardStepInstructions();
+		initialized = true;
 	}
-	return InstancePointer;
 }
 
 void StringConstants::SetupEasyStepInstructions()
@@ -26,7 +24,7 @@ void StringConstants::SetupEasyStepInstructions()
 	EasyStepInstructions[EBuildStep::NorthKerashim] = LOCTEXT("BuildInstructions.KerashimNorth.Easy", "There are four Kerashim to be placed on the North side of the Mishkan. Please place them in their correct spot.");
 	EasyStepInstructions[EBuildStep::Shulchan] = LOCTEXT("BuildInstructions.Shulchan.Easy", "The shulchan should be built next. It is on the right side of the Mishkan.");
 	EasyStepInstructions[EBuildStep::Menorah] = LOCTEXT("BuildInstructions.Menorah.Easy", "The menorah should be built next.");
-	EasyStepInstructions[EBuildStep::MizbeachHazahav] = LOCTEXT("BuildInstructions.MizbeachHazahav.Easy", "The Mizbeach HaZahav should be built next on the left side of the Mishkan.");
+	EasyStepInstructions[EBuildStep::MizbeachHazahav] = LOCTEXT("BuildInstructions.MizbeachHazahav.Easy", "The Mizbeach HaZahav should be built next on the right side of the Mishkan.");
 }
 
 void StringConstants::SetupHardStepInstructions()

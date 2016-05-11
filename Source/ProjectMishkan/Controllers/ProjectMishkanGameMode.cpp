@@ -3,6 +3,7 @@
 #include "ProjectMishkan.h"
 #include "ProjectMishkanGameMode.h"
 #include "ProjectMishkanPlayerController.h"
+#include "../Model/StringConstants.h"
 #include "../GameObjects/MishkanHUD.h"
 
 AProjectMishkanGameMode::AProjectMishkanGameMode(const FObjectInitializer& ObjectInitializer)
@@ -12,4 +13,5 @@ AProjectMishkanGameMode::AProjectMishkanGameMode(const FObjectInitializer& Objec
 	DefaultPawnClass = NULL;
 	HUDClass = AMishkanHUD::StaticClass();
 	PlayerControllerClass = AProjectMishkanPlayerController::StaticClass();
+	StringConstants::Initialize();
 }

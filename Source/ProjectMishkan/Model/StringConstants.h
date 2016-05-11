@@ -4,19 +4,22 @@
 #include "BuildSteps.h"
 #include <map>
 
+/**
+ * Static helper class to receive localized text that's useful throughout the game
+ */
 class PROJECTMISHKAN_API StringConstants {
 public:
-	static StringConstants* Instance();
-	FText GetInstructions(EBuildStep step);
+	static void Initialize();
+	static FText GetInstructions(EBuildStep step);
 private:
-	StringConstants();		// Singleton
-	StringConstants(StringConstants& other);		// Don't let people call this
+	StringConstants();	// Can't create an instance
+	StringConstants(StringConstants& other);		// Don't let people copy this
 
-	void SetupEasyStepInstructions();
-	void SetupHardStepInstructions();
+	static void SetupEasyStepInstructions();
+	static void SetupHardStepInstructions();
 
-	static StringConstants* InstancePointer;
+	static bool initialized;
 
-	std::map<EBuildStep, FText> EasyStepInstructions;
-	std::map<EBuildStep, FText> HardStepInstructions;
+	static std::map<EBuildStep, FText> EasyStepInstructions;
+	static std::map<EBuildStep, FText> HardStepInstructions;
 };
