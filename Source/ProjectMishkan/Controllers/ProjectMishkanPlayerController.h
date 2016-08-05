@@ -1,10 +1,10 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "GameFramework/PlayerController.h"
-#include "Camera/CameraActor.h"
 #include "../Interfaces/IPlaceable.h"
 #include "../Model/BuildModes.h"
 #include "../Model/BuildOrder.h"
+#include "../GameObjects/MishkanCamera.h"
 #include "../GameObjects/MishkanPawn.h"
 #include "ProjectMishkanPlayerController.generated.h"
 
@@ -30,8 +30,8 @@ private:
 	T* GetActorInWorld(const FString& Name);
 
 	// Helper functions to lazy load camera pointers
-	ACameraActor* GetMainCamera();
-	ACameraActor* GetPlacementCamera();
+	AMishkanCamera* GetMainCamera();
+	AMishkanCamera* GetPlacementCamera();
 
 	// Event Handlers
 	void SwitchToCharacterMode();
@@ -55,6 +55,9 @@ private:
 	void PressedRight();
 	void ReleasedRight();
 
+	void ZoomIn();
+	void ZoomOut();
+
 	// Helper functions to switch the current camera
 	void ChangeToMainCamera();
 	void ChangeToPlacementCamera();
@@ -65,12 +68,12 @@ private:
 	// Camera variables/constants
 	static const FString MainCameraName;
 	static const FString PlacementCameraName;
-	ACameraActor* CurrentCamera;
-	ACameraActor* MainCamera;
-	ACameraActor* PlacementCamera;
-	ACameraActor* FirstPersonCamera;
+	AMishkanCamera* CurrentCamera;
+	AMishkanCamera* MainCamera;
+	AMishkanCamera* PlacementCamera;
 
 	const uint16 PlacementCameraOffset = 250;	// Used to calculate how high to place the placeable in Placement Mode
+	void ZoomPlaceable();
 
 	EBuildMode BuildMode;
 	IPlaceable* Placeable;

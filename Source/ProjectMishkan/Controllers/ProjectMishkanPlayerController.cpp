@@ -102,6 +102,7 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("OnRelease", IE_Released, this, &AProjectMishkanPlayerController::OnRelease);
 	InputComponent->BindAction("AttemptPlacement", IE_Released, this, &AProjectMishkanPlayerController::AttemptPlacement);
 	InputComponent->BindAction("CancelPlacement", IE_Released, this, &AProjectMishkanPlayerController::CancelPlacement);
+
 	InputComponent->BindAction("ToggleHidePlaceables", IE_Released, this, &AProjectMishkanPlayerController::ToggleHidePlaceables);
 
 	InputComponent->BindAction("MoveForward", IE_Pressed, this, &AProjectMishkanPlayerController::PressedForward);
@@ -112,6 +113,9 @@ void AProjectMishkanPlayerController::SetupInputComponent()
 	InputComponent->BindAction("MoveBack", IE_Released, this, &AProjectMishkanPlayerController::ReleasedBack);
 	InputComponent->BindAction("MoveLeft", IE_Released, this, &AProjectMishkanPlayerController::ReleasedLeft);
 	InputComponent->BindAction("MoveRight", IE_Released, this, &AProjectMishkanPlayerController::ReleasedRight);
+
+	InputComponent->BindAction("ZoomIn", IE_Released, this, &AProjectMishkanPlayerController::ZoomIn);
+	InputComponent->BindAction("ZoomOut", IE_Released, this, &AProjectMishkanPlayerController::ZoomOut);
 }
 
 void AProjectMishkanPlayerController::SetBuildMode(EBuildMode mode)
@@ -139,7 +143,7 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 	ChangeToPlacementCamera();
 
 	// Update the camera's location to the Placeable's location
-	ACameraActor* camera = GetPlacementCamera();
+	AMishkanCamera* camera = GetPlacementCamera();
 	FVector cameraLoc = camera->GetActorLocation();
 	FVector placeableLoc = Placeable->GetLocation();
 	cameraLoc.X = placeableLoc.X;
@@ -154,19 +158,19 @@ void AProjectMishkanPlayerController::SelectPlaceable(IPlaceable* placeable)
 }
 
 // Lazy loads Main Camera pointer
-FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetMainCamera()
+FORCEINLINE AMishkanCamera* AProjectMishkanPlayerController::GetMainCamera()
 {
 	if (MainCamera == NULL) {
-		return GetActorInWorld<ACameraActor>(MainCameraName);
+		MainCamera = GetActorInWorld<AMishkanCamera>(MainCameraName);
 	}
 	return MainCamera;
 }
 
 // Lazy loads Main Camera pointer
-FORCEINLINE ACameraActor* AProjectMishkanPlayerController::GetPlacementCamera()
+FORCEINLINE AMishkanCamera* AProjectMishkanPlayerController::GetPlacementCamera()
 {
 	if (PlacementCamera == NULL) {
-		return GetActorInWorld<ACameraActor>(PlacementCameraName);
+		PlacementCamera = GetActorInWorld<AMishkanCamera>(PlacementCameraName);
 	}
 	return PlacementCamera;
 }
@@ -324,6 +328,30 @@ void AProjectMishkanPlayerController::ReleasedRight()
 	PressingRight = false;
 }
 
+void AProjectMishkanPlayerController::ZoomIn()
+{
+	CurrentCamera->ZoomIn();
+	ZoomPlaceable();
+}
+
+void AProjectMishkanPlayerController::ZoomOut()
+{
+	CurrentCamera->ZoomOut();
+	ZoomPlaceable();
+}
+
+// Have the Placeable zoom with the Camera as it zooms
+void AProjectMishkanPlayerController::ZoomPlaceable()
+{
+	if (BuildMode == EBuildMode::Placement) {
+		FVector cameraLoc = CurrentCamera->GetActorLocation();
+		FVector placeableLoc = Placeable->GetLocation();
+
+		placeableLoc.Z = cameraLoc.Z - Placeable->GetSize().Z - PlacementCameraOffset;
+		Placeable->SetLocation(placeableLoc);
+	}
+}
+
 // Helper functions to switch the current camera
 void AProjectMishkanPlayerController::ChangeToMainCamera()
 {
@@ -337,7 +365,7 @@ void AProjectMishkanPlayerController::ChangeToPlacementCamera()
 
 void AProjectMishkanPlayerController::ChangeToCamera(const FString& Name)
 {
-	ACameraActor* camera = GetActorInWorld<ACameraActor>(Name);
+	AMishkanCamera* camera = GetActorInWorld<AMishkanCamera>(Name);
 	if (camera != NULL) {
 		CurrentCamera = camera;
 		SetViewTarget(camera);
